@@ -111,6 +111,38 @@ body {
   line-height: 1.8;
   color: rgba(255, 255, 255, 0.95);
 }
+.love-badge {
+  margin: 18px auto 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 18px;
+  border-radius: 999px;
+  background: rgba(255, 192, 203, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  color: #ffe4ef;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  box-shadow: 0 8px 24px rgba(255, 182, 193, 0.18);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.love-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #ff8fb1;
+  box-shadow: 0 0 12px rgba(255, 143, 177, 0.9);
+}
+
+@media (max-width: 768px) {
+  .love-badge {
+    font-size: 14px;
+    padding: 9px 14px;
+  }
+}
 
 .hero-actions {
   margin-top: 34px;
