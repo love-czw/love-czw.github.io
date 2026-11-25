@@ -3,98 +3,87 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#101714">
-  <meta name="description" content="愚蠢的博弈游戏是一款回合制人机卡牌游戏。看见对手的牌，再猜它下一手怎么打。">
+  <meta name="theme-color" content="#111613">
+  <meta name="description" content="愚蠢的博弈游戏。手牌公开，行动暗选。选一张牌，和邪恶的小北较量。">
   <title>愚蠢的博弈游戏</title>
-  <link rel="stylesheet" href="styles.css?v=fan-1">
-  <script defer src="app.js?v=fan-1"></script>
+  <link rel="icon" type="image/png" href="assets/shield-strike.png">
+  <link rel="stylesheet" href="lobby.css?v=lobby-2">
+  <script src="lobby.js" defer></script>
 </head>
 <body>
-  <header class="masthead">
-    <div class="masthead-inner">
-      <div class="brand">
-        <span class="brand-mark" aria-hidden="true"><i></i><i></i></span>
-        <div>
-          <h1>愚蠢的博弈游戏</h1>
-          <p lang="en">STUPID MIND GAMES</p>
-        </div>
+  <header class="topbar">
+    <div class="frame topbar-inner">
+      <div class="wordmark">
+        <span class="seal" aria-hidden="true"></span>
+        <span lang="en">STUPID<br>MIND GAMES</span>
       </div>
-      <div class="header-actions">
-        <button class="button button-quiet" id="show-rules" type="button">玩法</button>
-        <button class="button button-outline" id="restart" type="button" disabled>重开对局</button>
-      </div>
+      <button class="rules-button" type="button" data-dialog="rules">玩法说明</button>
     </div>
   </header>
 
-  <main class="game-layout">
-    <section class="board" id="board" aria-label="卡牌战场" data-phase="loading">
-      <section class="fighter fighter-computer" aria-labelledby="computer-title">
-        <div class="fighter-profile">
-          <h2 id="computer-title">邪恶的小北</h2>
-          <div id="computer-stats" class="fighter-stats"></div>
-        </div>
-        <div id="computer-hand" class="hand opponent-hand" aria-label="邪恶的小北的手牌"></div>
-      </section>
-
-      <section class="arena" aria-label="对战区">
-        <section class="journal" aria-labelledby="journal-title">
-          <div class="journal-head">
-            <h2 id="journal-title">对局记录</h2>
-          </div>
-          <div class="recent-moves" aria-label="双方最近出牌" aria-live="polite">
-            <div class="recent-move recent-player">
-              <span>你</span>
-              <strong id="latest-player">待出牌</strong>
-            </div>
-            <div class="recent-move recent-computer">
-              <span>邪恶的小北</span>
-              <strong id="latest-computer">待出牌</strong>
-            </div>
-          </div>
-          <details class="journal-history">
-            <summary>完整记录</summary>
-            <div id="journal-scroll" class="journal-scroll" tabindex="0" aria-label="历史出牌">
-              <ol class="journal-events" id="journal-events"></ol>
-            </div>
-          </details>
-          <p class="notice" id="notice" role="status" hidden></p>
-        </section>
-        <div class="arena-center">
-          <h2 id="phase-title" aria-live="polite">准备对局</h2>
-          <p id="phase-detail" class="phase-detail">正在载入对局。</p>
-          <button type="button" id="pass" class="button button-pass" hidden>跳过出牌</button>
-          <button type="button" id="play-again" class="button button-primary" hidden>再开一局</button>
-          <button type="button" id="retry" class="button button-outline" hidden>重新载入</button>
-        </div>
-      </section>
-
-      <section class="fighter fighter-player" aria-labelledby="player-title">
-        <div class="fighter-profile">
-          <h2 id="player-title">你</h2>
-          <div id="player-stats" class="fighter-stats"></div>
-        </div>
-        <div id="player-hand" class="hand player-hand" aria-label="你的手牌"></div>
-      </section>
-      <footer class="table-info" aria-label="回合与牌堆信息">
-        <span class="turn-label" id="turn-label">第 1 回合</span>
-        <span>抽牌堆 <strong id="draw-count">—</strong></span>
-        <span>弃牌堆 <strong id="discard-count">—</strong></span>
-      </footer>
+  <main class="frame lobby">
+    <section class="hero" aria-labelledby="game-title">
+      <div class="hero-content">
+        <h1 id="game-title"><span>愚蠢的</span><span>博弈游戏</span></h1>
+        <p>看得见手牌，猜不透下一手。</p>
+      </div>
     </section>
 
+    <section class="modes" aria-labelledby="modes-title">
+      <h2 id="modes-title">选择模式</h2>
+      <div class="mode-grid">
+        <a class="mode mode-ai" href="battle.html" aria-labelledby="ai-label" aria-describedby="ai-detail">
+          <span class="mode-art"></span>
+          <span class="mode-status"><i aria-hidden="true"></i>可游玩</span>
+          <span class="mode-copy">
+            <strong id="ai-label">人机对战</strong>
+            <span id="ai-detail">挑战邪恶的小北</span>
+          </span>
+          <span class="mode-arrow" aria-hidden="true">↗</span>
+        </a>
+        <button class="mode mode-duel" type="button" data-dialog="duel"
+                aria-labelledby="duel-label" aria-describedby="duel-status">
+          <span class="mode-art"></span>
+          <span class="mode-status" id="duel-status">筹备中</span>
+          <span class="mode-copy">
+            <strong id="duel-label">双人对战</strong>
+            <span>与好友较量</span>
+          </span>
+          <span class="mode-arrow" aria-hidden="true">↗</span>
+        </button>
+        <button class="mode mode-tower" type="button" data-dialog="tower"
+                aria-labelledby="tower-label" aria-describedby="tower-status">
+          <span class="mode-art"></span>
+          <span class="mode-status" id="tower-status">筹备中</span>
+          <span class="mode-copy">
+            <strong id="tower-label">爬塔</strong>
+            <span>逐层闯关</span>
+          </span>
+          <span class="mode-arrow" aria-hidden="true">↗</span>
+        </button>
+        <button class="mode mode-boss" type="button" data-dialog="boss"
+                aria-labelledby="boss-label" aria-describedby="boss-status">
+          <span class="mode-art"></span>
+          <span class="mode-status" id="boss-status">筹备中</span>
+          <span class="mode-copy">
+            <strong id="boss-label">限时 Boss</strong>
+            <span>挑战巨像</span>
+          </span>
+          <span class="mode-arrow" aria-hidden="true">↗</span>
+        </button>
+      </div>
+    </section>
   </main>
 
-  <dialog id="rules">
-    <div class="rules-head">
-      <h2>玩法</h2>
+  <dialog id="lobby-dialog" aria-labelledby="dialog-title" aria-describedby="dialog-description">
+    <div class="dialog-art" aria-hidden="true"></div>
+    <div class="dialog-body">
+      <h2 id="dialog-title"></h2>
+      <p id="dialog-description"></p>
       <form method="dialog">
-        <button class="button button-quiet" type="submit">关闭</button>
+        <button class="rules-button" type="submit" autofocus>关闭</button>
       </form>
     </div>
-    <p>双方各 24 点血、4 点初始蓝，并公开手牌。每回合选一张牌或跳过。回合结束回 1 蓝、摸 1 张，超过 6 张就选牌弃掉。</p>
-    <p>蓝量上限 7，护盾先吸收伤害。牌堆摸空时，洗回弃牌堆。先把对手打到 0 血就赢。</p>
-    <div class="rules-list" id="rules-list"></div>
-    <a class="credit-link" href="assets/素材来源.md">查看美术素材来源</a>
   </dialog>
 </body>
 </html>

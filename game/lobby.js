@@ -1,0 +1,34 @@
+"use strict";
+
+const panels = {
+  rules: {
+    title: "怎么玩",
+    description: "双方手牌公开，每轮各出至多一张。小北先在暗中锁定行动，你选完后双方同时亮牌。格挡立即生效，能挡住本轮的伤害和破盾。其余动作按玩家、对手的顺序结算。把对手打到 0 血就赢。"
+  },
+  duel: {
+    title: "双人对战",
+    description: "这个模式筹备中。未来可以和好友各自暗选，然后一起亮牌。"
+  },
+  tower: {
+    title: "爬塔",
+    description: "这个模式筹备中。未来可以沿着高塔逐层挑战。"
+  },
+  boss: {
+    title: "限时 Boss",
+    description: "这个模式筹备中。未来可以在时限内挑战巨像。"
+  }
+};
+
+const dialog = document.getElementById("lobby-dialog");
+const title = document.getElementById("dialog-title");
+const description = document.getElementById("dialog-description");
+
+for (const button of document.querySelectorAll("[data-dialog]")) {
+  button.addEventListener("click", () => {
+    const panel = panels[button.dataset.dialog];
+    dialog.dataset.panel = button.dataset.dialog;
+    title.textContent = panel.title;
+    description.textContent = panel.description;
+    dialog.showModal();
+  });
+}

@@ -7,7 +7,7 @@ const cards = [
     rules: "造成 4 点伤害。蓄力后造成 9 点伤害。",
     detail: (fighter) => fighter.charged ? "伤害 9" : "伤害 4" },
   { name: "格挡", cost: 2, art: "block.png", tone: "iron",
-    rules: "挡住对手下个回合的全部伤害和破盾。",
+    rules: "亮牌时生效，挡住对手本轮的全部伤害和破盾。",
     detail: () => "格挡一回合" },
   { name: "回能", cost: 0, art: "restore-mana.png", tone: "azure",
     rules: "回复 3 点蓝。蓄力后回复 5 点蓝。",
@@ -49,6 +49,7 @@ const dom = {
   retry: document.getElementById("retry"),
   journalScroll: document.getElementById("journal-scroll"),
   journalEvents: document.getElementById("journal-events"),
+  journalTitle: document.getElementById("journal-title"),
   latestPlayer: document.getElementById("latest-player"),
   latestComputer: document.getElementById("latest-computer"),
   notice: document.getElementById("notice"),
@@ -76,16 +77,16 @@ function el(tag, className, content) {
 
 function isValidState(next) {
   return next && ["play", "discard", "computer", "finished"].includes(next.phase) &&
-    next.player && Array.isArray(next.player.hand) &&
+    Object.hasOwn(next, "revealed") && next.player && Array.isArray(next.player.hand) &&
     next.computer && Array.isArray(next.computer.hand) && Array.isArray(next.log);
 }
 
 async function getMatch() {
   if (!match) {
     try {
-      const { default: createEngine } = await import("./game-engine.js?v=xiaobei-1");
+      const { default: createEngine } = await import("./game-engine.js?v=blind-pick-1");
       const engine = await createEngine({
-        locateFile: (file, prefix) => prefix + file + "?v=xiaobei-1"
+        locateFile: (file, prefix) => prefix + file + "?v=blind-pick-1"
       });
       match = new engine.PreviewMatch();
     } catch {
@@ -214,6 +215,13 @@ function renderHand(container, fighter, player) {
   container.scrollLeft = previousScroll;
 }
 
+function renderReveal(reveal) {
+  const name = id => id === -1 ? "跳过" : cards[id].name;
+  dom.journalTitle.textContent = reveal ? "第 " + reveal.turn + " 轮亮牌" : "双方亮牌";
+  dom.latestPlayer.textContent = reveal ? name(reveal.player) : "待亮牌";
+  dom.latestComputer.textContent = reveal ? name(reveal.computer) : "待亮牌";
+}
+
 function renderJournal(records) {
   const events = records.slice(-50);
   const key = JSON.stringify(events);
@@ -222,26 +230,15 @@ function renderJournal(records) {
   }
   visibleLog = key;
 
-  const moves = { player: "待出牌", computer: "待出牌" };
   const rows = document.createDocumentFragment();
   const sideNames = { player: "你", computer: computerName, system: "对局" };
   for (const event of events) {
-    if (event.side === "player" || event.side === "computer") {
-      const card = event.text.match(/打出了「([^」]+)」/);
-      if (card) {
-        moves[event.side] = card[1];
-      } else if (event.text.includes("跳过出牌")) {
-        moves[event.side] = "跳过";
-      }
-    }
     const row = el("li", "journal-event");
     row.dataset.side = event.side;
     row.append(el("span", "actor", sideNames[event.side] || "对局"),
                el("p", "event-text", event.text));
     rows.append(row);
   }
-  dom.latestPlayer.textContent = moves.player;
-  dom.latestComputer.textContent = moves.computer;
   dom.journalEvents.replaceChildren(rows);
   dom.journalScroll.scrollTop = dom.journalScroll.scrollHeight;
 }
@@ -287,7 +284,7 @@ function render() {
     case "play":
       dom.phaseTitle.textContent = "你的回合";
       dom.phaseDetail.textContent = state.player.hand.length
-        ? "点一张手牌出牌。"
+        ? "对手已锁定行动。点一张手牌，或跳过。"
         : "手牌为空，可以跳过并摸牌。";
       dom.pass.hidden = Boolean(error);
       break;
@@ -296,8 +293,8 @@ function render() {
       dom.phaseDetail.textContent = "手牌 " + state.player.hand.length + " 张，点牌弃到 6 张。";
       break;
     case "computer":
-      dom.phaseTitle.textContent = "对手回合";
-      dom.phaseDetail.textContent = computerName + "正在选牌。";
+      dom.phaseTitle.textContent = "双方已亮牌";
+      dom.phaseDetail.textContent = computerName + "正在结算已亮出的行动。";
       break;
     case "finished":
       dom.phaseTitle.textContent = state.winner === "player" ? "你赢了" : computerName + "获胜";
@@ -310,6 +307,7 @@ function render() {
   renderStats(dom.playerStats, state.player);
   renderHand(dom.computerHand, state.computer, false);
   renderHand(dom.playerHand, state.player, true);
+  renderReveal(state.revealed);
   renderJournal(state.log);
   updateControls();
 }

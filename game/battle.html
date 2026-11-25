@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101714">
+  <meta name="description" content="愚蠢的博弈游戏是一款回合制人机卡牌游戏。看见对手的牌，再猜它下一手怎么打。">
+  <title>人机对战 · 愚蠢的博弈游戏</title>
+  <link rel="icon" type="image/png" href="assets/shield-strike.png">
+  <link rel="stylesheet" href="styles.css?v=lobby-1">
+  <script defer src="app.js?v=blind-pick-1"></script>
+</head>
+<body>
+  <header class="masthead">
+    <div class="masthead-inner">
+      <a class="brand battle-home" href="./" aria-label="返回游戏大厅">
+        <span class="brand-mark" aria-hidden="true"><i></i><i></i></span>
+        <div>
+          <h1>愚蠢的博弈游戏</h1>
+          <p><span aria-hidden="true">←</span> 返回大厅</p>
+        </div>
+      </a>
+      <div class="header-actions">
+        <button class="button button-quiet" id="show-rules" type="button">玩法</button>
+        <button class="button button-outline" id="restart" type="button" disabled>重开对局</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="game-layout">
+    <section class="board" id="board" aria-label="卡牌战场" data-phase="loading">
+      <section class="fighter fighter-computer" aria-labelledby="computer-title">
+        <div class="fighter-profile">
+          <h2 id="computer-title">邪恶的小北</h2>
+          <div id="computer-stats" class="fighter-stats"></div>
+        </div>
+        <div id="computer-hand" class="hand opponent-hand" aria-label="邪恶的小北的手牌"></div>
+      </section>
+
+      <section class="arena" aria-label="对战区">
+        <section class="journal" aria-labelledby="journal-title">
+          <div class="journal-head">
+            <h2 id="journal-title">双方亮牌</h2>
+          </div>
+          <div class="recent-moves" aria-label="最近一次双方亮牌" aria-live="polite">
+            <div class="recent-move recent-player">
+              <span>你</span>
+              <strong id="latest-player">待亮牌</strong>
+            </div>
+            <div class="recent-move recent-computer">
+              <span>邪恶的小北</span>
+              <strong id="latest-computer">待亮牌</strong>
+            </div>
+          </div>
+          <details class="journal-history">
+            <summary>完整记录</summary>
+            <div id="journal-scroll" class="journal-scroll" tabindex="0" aria-label="历史出牌">
+              <ol class="journal-events" id="journal-events"></ol>
+            </div>
+          </details>
+          <p class="notice" id="notice" role="status" hidden></p>
+        </section>
+        <div class="arena-center">
+          <h2 id="phase-title" aria-live="polite">准备对局</h2>
+          <p id="phase-detail" class="phase-detail">正在载入对局。</p>
+          <button type="button" id="pass" class="button button-pass" hidden>跳过出牌</button>
+          <button type="button" id="play-again" class="button button-primary" hidden>再开一局</button>
+          <button type="button" id="retry" class="button button-outline" hidden>重新载入</button>
+        </div>
+      </section>
+
+      <section class="fighter fighter-player" aria-labelledby="player-title">
+        <div class="fighter-profile">
+          <h2 id="player-title">你</h2>
+          <div id="player-stats" class="fighter-stats"></div>
+        </div>
+        <div id="player-hand" class="hand player-hand" aria-label="你的手牌"></div>
+      </section>
+      <footer class="table-info" aria-label="回合与牌堆信息">
+        <span class="turn-label" id="turn-label">第 1 回合</span>
+        <span>抽牌堆 <strong id="draw-count">—</strong></span>
+        <span>弃牌堆 <strong id="discard-count">—</strong></span>
+      </footer>
+    </section>
+
+  </main>
+
+  <dialog id="rules">
+    <div class="rules-head">
+      <h2>玩法</h2>
+      <form method="dialog">
+        <button class="button button-quiet" type="submit">关闭</button>
+      </form>
+    </div>
+    <p>双方各 24 点血、4 点初始蓝，手牌公开。每轮开始，电脑根据双方手牌暗中锁定一张牌或跳过，然后由你选择。你选定后，双方同时亮牌。</p>
+    <p>格挡在亮牌时对双方同时生效，本轮结束时失效。其余牌先结算你的行动，再结算电脑的行动。生命降到 0 时立即结束。各自在回合末回 1 蓝、摸 1 张，超过 6 张就弃至 6 张。</p>
+    <p>蓝量上限 7，护盾先吸收伤害。牌堆摸空时，洗回弃牌堆。先把对手打到 0 血就赢。</p>
+    <div class="rules-list" id="rules-list"></div>
+    <a class="credit-link" href="assets/素材来源.md">查看美术素材来源</a>
+  </dialog>
+</body>
+</html>
