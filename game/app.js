@@ -1,4 +1,4 @@
-"use strict";
+import { createBattleMotion } from "./duel.js?v=epic-2";
 
 const computerName = document.getElementById("computer-title").textContent;
 
@@ -57,6 +57,9 @@ const dom = {
   rulesList: document.getElementById("rules-list")
 };
 
+const battleMotion = createBattleMotion(document.querySelector(".duel-stage"));
+const updateComputerStats = createFighterStats(dom.computerStats);
+const updatePlayerStats = createFighterStats(dom.playerStats);
 let state = null;
 let pending = false;
 let error = "";
@@ -73,6 +76,12 @@ function el(tag, className, content) {
     element.textContent = content;
   }
   return element;
+}
+
+function updateText(element, text) {
+  if (element.textContent !== text) {
+    element.textContent = text;
+  }
 }
 
 function isValidState(next) {
@@ -114,6 +123,12 @@ async function requestState(action) {
     if (!isValidState(next)) {
       throw new Error("对局数据有误，请重新载入。");
     }
+    if (action?.type === "play" || action?.type === "pass") {
+      renderReveal(next.revealed);
+      dom.phaseTitle.textContent = "双方已亮牌";
+      dom.phaseDetail.textContent = "结算本轮行动。";
+    }
+    await battleMotion.resolve(action?.type, state, next);
     state = next;
   } catch (reason) {
     error = reason instanceof Error ? reason.message : "本次操作失败，请重试。";
@@ -121,105 +136,127 @@ async function requestState(action) {
     pending = false;
     render();
     if (state?.phase === "computer" && !error) {
-      computerTimer = window.setTimeout(() => requestState({ type: "computer" }), 520);
+      computerTimer = window.setTimeout(() => requestState({ type: "computer" }), 48);
     }
   }
 }
 
-function statBar(label, value, max, kind) {
+function statBar(label, max, kind) {
   const stat = el("div", "stat");
   const meta = el("div", "stat-label");
-  meta.append(el("span", "", label), el("strong", "", value + "/" + max));
+  const amount = el("strong");
+  meta.append(el("span", "", label), amount);
   const track = el("div", "progress-track");
   track.setAttribute("role", "progressbar");
   track.setAttribute("aria-label", label);
   track.setAttribute("aria-valuemin", "0");
   track.setAttribute("aria-valuemax", max);
-  track.setAttribute("aria-valuenow", value);
   const fill = el("span", "progress-fill progress-" + kind);
-  fill.style.setProperty("--value", Math.max(0, Math.min(100, 100 * value / max)) + "%");
   track.append(fill);
   stat.append(meta, track);
-  return stat;
+  return {
+    stat,
+    update(value) {
+      if (track.getAttribute("aria-valuenow") === String(value)) return;
+      updateText(amount, value + "/" + max);
+      track.setAttribute("aria-valuenow", value);
+      fill.style.setProperty("--fill", Math.max(0, Math.min(1, value / max)));
+    }
+  };
 }
 
-function renderStats(container, fighter) {
+function createFighterStats(container) {
+  const hp = statBar("生命", 24, "health");
+  const mp = statBar("蓝量", 7, "mana");
   const status = el("div", "stat-lower");
-  status.append(el("span", "status", "护盾 " + fighter.sp));
-  if (fighter.charged) {
-    status.append(el("span", "status status-charge", "蓄力"));
+  const ward = el("span", "status");
+  const charge = el("span", "status status-charge", "蓄力");
+  const guard = el("span", "status status-block", "格挡");
+  status.append(ward, charge, guard);
+  container.append(hp.stat, mp.stat, status);
+  container.hidden = true;
+  return fighter => {
+    hp.update(fighter.hp);
+    mp.update(fighter.mp);
+    updateText(ward, "护盾 " + fighter.sp);
+    charge.hidden = !fighter.charged;
+    guard.hidden = !fighter.blocking;
+    container.hidden = false;
+  };
+}
+
+function makeHandCard(id, info, player) {
+  const card = el(player ? "button" : "article", "card");
+  card.dataset.tone = info.tone;
+  card.dataset.card = id;
+  card.title = info.rules;
+  if (player) {
+    card.type = "button";
+    card.addEventListener("click", () => {
+      const index = Number(card.dataset.index);
+      if (state.phase === "discard") {
+        requestState({ type: "discard", index });
+      } else if (state.phase === "play" && state.player.mp >= info.cost) {
+        requestState({ type: "play", index });
+      }
+    });
   }
-  if (fighter.blocking) {
-    status.append(el("span", "status status-block", "格挡"));
-  }
-  container.replaceChildren(
-    statBar("生命", fighter.hp, 24, "health"),
-    statBar("蓝量", fighter.mp, 7, "mana"),
-    status
-  );
+
+  const cost = el("span", "card-cost", info.cost);
+  cost.setAttribute("aria-hidden", "true");
+
+  const art = el("div", "card-art");
+  const image = el("img");
+  image.src = "assets/duel/cards/" + info.art.replace(".png", ".webp");
+  image.alt = "";
+  image.draggable = false;
+  image.addEventListener("error", () => { image.hidden = true; }, { once: true });
+  art.append(image);
+
+  const caption = el("div", "card-caption");
+  caption.append(el("strong", "card-title", info.name), el("span", "card-effect"));
+  card.append(cost, art, caption);
+  return card;
 }
 
 function renderHand(container, fighter, player) {
-  const previousScroll = container.scrollLeft;
   const handCount = fighter.hand.length;
   container.style.setProperty("--spread-steps", Math.max(1, Math.min(handCount, 6) - 1));
   container.dataset.crowded = String(handCount >= 5);
-  const list = document.createDocumentFragment();
+  const unused = new Set(container.children);
+  const ordered = [];
 
   fighter.hand.forEach((id, index) => {
     const info = cards[id];
-    if (!info) {
-      return;
-    }
-    const card = el(player ? "button" : "article", "card");
-    card.dataset.tone = info.tone;
+    if (!info) return;
+    const existing = [...unused].find(node => Number(node.dataset.card) === id);
+    const card = existing ?? makeHandCard(id, info, player);
+    unused.delete(card);
     card.dataset.index = index;
-    card.dataset.card = id;
-    card.title = info.rules;
-    card.setAttribute("aria-label", [info.name, "费用 " + info.cost + " 蓝",
-                                     info.detail(fighter), info.rules].join("，"));
-
-    if (player) {
-      card.type = "button";
-      card.addEventListener("click", () => {
-        if (state.phase === "discard") {
-          requestState({ type: "discard", index });
-        } else if (state.phase === "play" && state.player.mp >= info.cost) {
-          requestState({ type: "play", index });
-        }
-      });
-    }
-
-    const cost = el("span", "card-cost", info.cost);
-    cost.setAttribute("aria-hidden", "true");
-
-    const art = el("div", "card-art");
-    const image = el("img");
-    image.src = "assets/" + info.art;
-    image.alt = "";
-    image.draggable = false;
-    image.addEventListener("error", () => { image.hidden = true; }, { once: true });
-    art.append(image);
-
-    const caption = el("div", "card-caption");
-    caption.append(el("strong", "card-title", info.name),
-                   el("span", "card-effect", info.detail(fighter)));
-    card.append(cost, art, caption);
-    list.append(card);
+    const detail = info.detail(fighter);
+    updateText(card.querySelector(".card-effect"), detail);
+    const label = [info.name, "费用 " + info.cost + " 蓝", detail, info.rules].join("，");
+    if (card.getAttribute("aria-label") !== label) card.setAttribute("aria-label", label);
+    ordered.push(card);
   });
 
-  if (!list.childElementCount) {
-    list.append(el("p", "hand-empty", "手牌为空"));
+  if (ordered.length === 0) {
+    const empty = container.querySelector(".hand-empty") ?? el("p", "hand-empty", "手牌为空");
+    unused.delete(empty);
+    ordered.push(empty);
   }
-  container.replaceChildren(list);
-  container.scrollLeft = previousScroll;
+  for (const node of unused) node.remove();
+  ordered.forEach((node, index) => {
+    const current = container.children[index];
+    if (node !== current) container.insertBefore(node, current ?? null);
+  });
 }
 
 function renderReveal(reveal) {
   const name = id => id === -1 ? "跳过" : cards[id].name;
-  dom.journalTitle.textContent = reveal ? "第 " + reveal.turn + " 轮亮牌" : "双方亮牌";
-  dom.latestPlayer.textContent = reveal ? name(reveal.player) : "待亮牌";
-  dom.latestComputer.textContent = reveal ? name(reveal.computer) : "待亮牌";
+  updateText(dom.journalTitle, reveal ? "第 " + reveal.turn + " 轮亮牌" : "双方亮牌");
+  updateText(dom.latestPlayer, reveal ? name(reveal.player) : "待亮牌");
+  updateText(dom.latestComputer, reveal ? name(reveal.computer) : "待亮牌");
 }
 
 function renderJournal(records) {
@@ -240,7 +277,9 @@ function renderJournal(records) {
     rows.append(row);
   }
   dom.journalEvents.replaceChildren(rows);
-  dom.journalScroll.scrollTop = dom.journalScroll.scrollHeight;
+  if (dom.journalScroll.closest("details").open) {
+    dom.journalScroll.scrollTop = dom.journalScroll.scrollHeight;
+  }
 }
 
 function updateControls() {
@@ -303,8 +342,9 @@ function render() {
       break;
   }
 
-  renderStats(dom.computerStats, state.computer);
-  renderStats(dom.playerStats, state.player);
+  updateComputerStats(state.computer);
+  updatePlayerStats(state.player);
+  battleMotion.sync(state);
   renderHand(dom.computerHand, state.computer, false);
   renderHand(dom.playerHand, state.player, true);
   renderReveal(state.revealed);

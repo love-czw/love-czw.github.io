@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101714">
+  <title>美术素材来源</title>
+  <link rel="icon" type="image/png" href="assets/shield-strike.png">
+  <link rel="stylesheet" href="styles.css?v=lobby-1">
+  <style>
+    .credits-shell {
+      width: min(100% - 36px, 760px);
+      margin-inline: auto;
+    }
+    .credits-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      min-height: 64px;
+    }
+    .credits-header a {
+      display: inline-flex;
+      align-items: center;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .credits-content { padding-block: clamp(24px, 5vw, 54px) 48px; }
+    .credits-content h1,
+    .credit-section h2 { font-family: var(--serif); }
+    .credits-content h1 {
+      margin: 0 0 24px;
+      font-size: clamp(1.95rem, 5vw, 3rem);
+      line-height: 1.12;
+    }
+    .credit-section {
+      padding: clamp(16px, 4vw, 26px);
+      margin-bottom: 14px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--panel);
+    }
+    .credit-section h2 {
+      color: var(--gold);
+      font-size: 1.35rem;
+      margin: 0 0 8px;
+    }
+    .credit-section p { margin: 0 0 10px; }
+    .credit-section > :last-child { margin-bottom: 0; }
+    .credit-section a { color: var(--gold); text-underline-offset: 3px; }
+    .credit-links { display: flex; flex-wrap: wrap; gap: 4px 16px; }
+    .asset-details { margin-top: 12px; }
+    .asset-details summary { cursor: pointer; color: var(--gold); }
+    .asset-details summary:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+    .asset-details table { width: 100%; border-collapse: collapse; margin-top: 8px; text-align: left; }
+    .asset-details th, .asset-details td { padding: 7px 5px; border-bottom: 1px solid var(--line); }
+    .asset-details code { font-size: .84rem; overflow-wrap: anywhere; }
+  </style>
+</head>
+<body>
+  <header class="masthead">
+    <div class="credits-shell credits-header">
+      <span>愚蠢的博弈游戏</span>
+      <a class="button button-outline" href="battle.html">返回对战</a>
+    </div>
+  </header>
+
+  <main class="credits-shell credits-content">
+    <h1>美术素材来源</h1>
+
+    <section class="credit-section" aria-labelledby="credits-generated">
+      <h2 id="credits-generated">史诗竞技场与大厅</h2>
+      <p>当前对战使用的竞技场背景、两名角色和九张卡图均使用内置图像生成工具制作，文件位于 <code>assets/duel/</code>。</p>
+      <p>大厅主景、人机对战、双人对战、爬塔、限时 Boss 和玩法说明的六幅插画也使用内置图像生成工具制作，文件位于 <code>assets/lobby/</code>。</p>
+    </section>
+
+    <section class="credit-section" aria-labelledby="credits-ravenmore">
+      <h2 id="credits-ravenmore">Ravenmore 的奇幻图标</h2>
+      <p>项目保留了 Ravenmore 的 <cite>Fantasy Icon Pack 2.0</cite> 中选用的卡牌和牌典图标，采用 CC BY 3.0 许可。原版 128 × 128 像素透明 PNG 经过选取和更名。浏览器标签页使用其中的盾牌图标 <code>shield-strike.png</code>。</p>
+      <p class="credit-links">
+        <a href="https://ravenmore.itch.io/">作者主页</a>
+        <a href="https://opengameart.org/node/11073">素材发布页</a>
+        <a href="https://creativecommons.org/licenses/by/3.0/">CC BY 3.0 许可</a>
+      </p>
+      <details class="asset-details">
+        <summary>查看原始文件对照</summary>
+        <table>
+          <thead>
+            <tr><th scope="col">项目文件</th><th scope="col">原始文件</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>normal-attack.png</code></td><td><code>128/sword.png</code></td></tr>
+            <tr><td><code>block.png</code></td><td><code>128/armor.png</code></td></tr>
+            <tr><td><code>restore-mana.png</code></td><td><code>128/potionBlue.png</code></td></tr>
+            <tr><td><code>shield-strike.png</code></td><td><code>128/upg_shield.png</code></td></tr>
+            <tr><td><code>break-shield.png</code></td><td><code>128/hammer.png</code></td></tr>
+            <tr><td><code>raise-shield.png</code></td><td><code>128/shield.png</code></td></tr>
+            <tr><td><code>exchange.png</code></td><td><code>128/scroll.png</code></td></tr>
+            <tr><td><code>heal.png</code></td><td><code>128/potionRed.png</code></td></tr>
+            <tr><td><code>charge.png</code></td><td><code>128/wand.png</code></td></tr>
+            <tr><td><code>codex.png</code></td><td><code>128/tome.png</code></td></tr>
+          </tbody>
+        </table>
+      </details>
+    </section>
+
+    <section class="credit-section" aria-labelledby="credits-martin">
+      <h2 id="credits-martin">John Martin 的城堡风景</h2>
+      <p>项目保留的旧版背景 <code>arena.jpg</code> 是 John Martin 的油画 <cite>Landscape with a Castle</cite>（约 1815–1820 年）的数字复制图。原作藏于耶鲁英国艺术中心，Wikimedia Commons 将这份复制图标为公有领域。</p>
+      <p><a href="https://commons.wikimedia.org/wiki/File:John_Martin_-_Landscape_with_a_Castle_-_Google_Art_Project.jpg">画作与公有领域说明</a></p>
+    </section>
+  </main>
+</body>
+</html>

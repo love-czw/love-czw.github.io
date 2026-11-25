@@ -1,0 +1,206 @@
+.duel-effects {
+  position: absolute;
+  z-index: 3;
+  inset: 0;
+  pointer-events: none;
+}
+.duel-stage[data-actor="player"] { --origin: var(--player-x); --flight: calc(var(--computer-x) - var(--player-x)); --mirror: 1; }
+.duel-stage[data-actor="computer"] { --origin: var(--computer-x); --flight: calc(var(--player-x) - var(--computer-x)); --mirror: -1; }
+.duel-effects [data-side="player"] { left: var(--player-x); }
+.duel-effects [data-side="computer"] { left: var(--computer-x); }
+.duel-stage[data-effect="normal-attack"] { --energy: #cbf5ff; --edge: #748ec5; }
+.duel-stage[data-effect="block"] { --energy: #c9f4ff; --edge: #5db7e1; }
+.duel-stage[data-effect="restore-mana"] { --energy: #aedefe; --edge: #4b8fff; }
+.duel-stage[data-effect="shield-strike"] { --energy: #ffdea3; --edge: #d17d36; }
+.duel-stage[data-effect="break-shield"] { --energy: #ffb4a0; --edge: #cf4d30; }
+.duel-stage[data-effect="raise-shield"] { --energy: #e2f6b7; --edge: #80bb74; }
+.duel-stage[data-effect="exchange"] { --energy: #efd3ff; --edge: #a477d0; }
+.duel-stage[data-effect="heal"] { --energy: #d4ffcd; --edge: #5cce81; }
+.duel-stage[data-effect="charge"] { --energy: #ffe5a7; --edge: #e5a74e; }
+
+.duel-projectile {
+  display: none;
+  position: absolute;
+  top: 48%;
+  left: var(--origin);
+  width: 100%;
+  height: 0;
+}
+.duel-projectile::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  width: clamp(50px, 13%, 164px);
+  height: clamp(20px, 4vw, 52px);
+  transform: translate(-50%, -50%) scaleX(var(--mirror));
+  background: linear-gradient(90deg, transparent, var(--edge) 32%, var(--energy) 88%, #fff9e5 98%);
+  clip-path: polygon(0 66%, 49% 50%, 89% 13%, 100% 4%, 83% 46%, 42% 78%);
+}
+.duel-stage:is([data-effect="normal-attack"], [data-effect="shield-strike"], [data-effect="break-shield"]) .duel-projectile {
+  display: block;
+  animation: duel-travel 345ms cubic-bezier(.37, .02, .42, 1) both;
+}
+.duel-stage[data-effect="shield-strike"] .duel-projectile::before {
+  width: clamp(43px, 10%, 125px);
+  height: clamp(27px, 5vw, 58px);
+  clip-path: polygon(0 50%, 64% 3%, 86% 9%, 100% 48%, 90% 78%, 68% 99%);
+}
+.duel-stage[data-effect="break-shield"] .duel-projectile::before {
+  clip-path: polygon(0 62%, 42% 32%, 34% 59%, 85% 17%, 73% 49%, 100% 36%, 60% 83%, 69% 60%, 25% 83%, 33% 63%);
+}
+.duel-impact {
+  position: absolute;
+  top: 47%;
+  width: clamp(44px, 16%, 141px);
+  aspect-ratio: 1;
+  border: 2px solid var(--energy);
+  border-radius: 50%;
+  background: radial-gradient(ellipse, transparent 44%, color-mix(in srgb, var(--edge), transparent 55%) 68%, transparent 71%);
+  box-shadow: 0 0 18px var(--edge), inset 0 0 22px var(--edge);
+  animation: duel-impact 370ms ease-out both;
+}
+.duel-stage:is([data-effect="normal-attack"], [data-effect="shield-strike"], [data-effect="break-shield"]) .duel-impact {
+  animation-delay: 115ms;
+  animation-duration: 275ms;
+}
+.duel-stage:is([data-result="block"], [data-result="shield"]) .duel-impact {
+  --energy: #d5faff;
+  --edge: #65b7eb;
+  aspect-ratio: .76;
+  background: repeating-radial-gradient(ellipse at center, transparent 0 15%, #aaddff50 17%, transparent 22%);
+}
+.duel-stage[data-result="hit"] .duel-impact {
+  border: 0;
+  background: conic-gradient(from 18deg, transparent 0 8%, var(--energy) 9% 11%, transparent 14% 28%,
+    var(--edge) 31% 34%, transparent 38% 62%, var(--energy) 64% 65%, transparent 68% 85%, var(--edge) 89% 94%, transparent 96%);
+  clip-path: polygon(50% 3%, 56% 33%, 91% 17%, 70% 45%, 100% 55%, 69% 62%, 84% 96%, 52% 76%, 31% 99%, 33% 68%, 0 60%, 28% 48%, 7% 18%, 42% 35%);
+}
+.duel-stage[data-effect="break-shield"][data-result="clear"] .duel-impact {
+  border: 0;
+  clip-path: polygon(1% 12%, 43% 36%, 41% 0, 61% 27%, 93% 9%, 73% 45%, 100% 63%, 60% 62%, 75% 99%, 40% 73%, 16% 99%, 24% 58%, 0 47%, 32% 46%);
+  background: repeating-conic-gradient(transparent 0% 11%, var(--edge) 15%, var(--energy) 18%, transparent 22%);
+}
+.duel-stage[data-effect="block"] .duel-impact {
+  aspect-ratio: .8;
+  border-width: 3px;
+  background: repeating-radial-gradient(ellipse at center, #6aaadd19 0 15%, #aaddff6a 17%, transparent 23%);
+}
+.duel-stage[data-effect="raise-shield"] .duel-impact {
+  border: 0;
+  aspect-ratio: .76;
+  clip-path: polygon(50% 2%, 96% 20%, 88% 66%, 73% 86%, 50% 99%, 27% 86%, 12% 66%, 4% 20%);
+  background: linear-gradient(135deg, var(--energy), #528a5363 36%, var(--energy) 44%, #88d99375 67%, var(--energy));
+}
+.duel-stage[data-effect="restore-mana"] .duel-impact {
+  border-style: double;
+  border-width: 5px;
+  background: repeating-conic-gradient(from 30deg, transparent 0 62deg, var(--energy) 69deg, transparent 89deg);
+  animation-name: duel-rise;
+}
+.duel-stage[data-effect="heal"] .duel-impact {
+  border: 0;
+  border-radius: 0;
+  clip-path: polygon(37% 4%, 63% 4%, 63% 36%, 95% 36%, 95% 63%, 63% 63%, 63% 96%, 37% 96%, 37% 63%, 5% 63%, 5% 36%, 37% 36%);
+  background: radial-gradient(ellipse, #f5ffee, var(--edge));
+  animation-name: duel-rise;
+}
+.duel-stage[data-effect="exchange"] .duel-impact {
+  width: clamp(20px, 4%, 37px);
+  aspect-ratio: .72;
+  border-radius: 3px;
+  background: linear-gradient(145deg, #d8b5ef, #352245 68%);
+  animation-name: duel-rise;
+}
+.duel-stage[data-effect="exchange"] .duel-impact::before,
+.duel-stage[data-effect="exchange"] .duel-impact::after {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border: 1px solid #edcefa;
+  border-radius: 3px;
+  background: #5d397d;
+}
+.duel-stage[data-effect="exchange"] .duel-impact::before { transform: translate(-60%, 7%) rotate(-24deg); }
+.duel-stage[data-effect="exchange"] .duel-impact::after { transform: translate(54%, 7%) rotate(24deg); }
+.duel-stage[data-effect="charge"] .duel-impact {
+  border: 3px double #ffe7ad;
+  background: radial-gradient(ellipse, #fff3c4 0 7%, #ffb964ad 12%, transparent 35%, #fdbc734f 60%, transparent 65%);
+  animation-name: duel-gather;
+}
+
+.duel-result {
+  position: absolute;
+  top: 22%;
+  min-width: max-content;
+  max-width: 90%;
+  padding: 3px 7px;
+  border: 1px solid color-mix(in srgb, var(--energy), transparent 48%);
+  border-radius: 3px;
+  color: var(--energy);
+  background: #111910ed;
+  font: 750 clamp(.79rem, 1.55vw, 1.08rem)/1.28 var(--sans);
+  text-shadow: 0 1px 4px #10140e;
+  animation: duel-label 400ms ease-out both;
+}
+.duel-stage[data-result="block"] .duel-result,
+.duel-stage[data-result="shield"] .duel-result { --energy: #d2f5ff; }
+.duel-stage[data-result="hit"] .duel-result { --energy: #ffd3be; }
+
+.duel-unit:is([data-acting="normal-attack"], [data-acting="shield-strike"], [data-acting="break-shield"]) .duel-sprite {
+  animation: duel-lunge 368ms ease-out both;
+}
+.duel-unit:is([data-acting="block"], [data-acting="raise-shield"]) .duel-sprite { animation: duel-brace 365ms ease-out both; }
+.duel-unit:is([data-acting="charge"], [data-acting="restore-mana"], [data-acting="heal"], [data-acting="exchange"]) .duel-sprite {
+  animation: duel-cast 370ms ease-out both;
+}
+.duel-unit[data-affected="hit"] .duel-sprite { animation: duel-recoil 245ms 120ms ease-out both; }
+
+@keyframes duel-travel {
+  0%, 15% { opacity: 0; transform: translate3d(0, 0, 0); }
+  32% { opacity: 1; }
+  65% { opacity: 1; transform: translate3d(var(--flight), 0, 0); }
+  100% { opacity: 0; transform: translate3d(var(--flight), 0, 0); }
+}
+@keyframes duel-impact {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(.38); }
+  27% { opacity: .93; }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(1.3); }
+}
+@keyframes duel-rise {
+  0% { opacity: 0; transform: translate(-50%, -18%) scale(.45) rotate(-10deg); }
+  35%, 63% { opacity: .9; }
+  100% { opacity: 0; transform: translate(-50%, -85%) scale(1) rotate(5deg); }
+}
+@keyframes duel-gather {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(1.52) rotate(-42deg); }
+  31%, 70% { opacity: 1; }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(.38) rotate(20deg); }
+}
+@keyframes duel-label {
+  0%, 14% { opacity: 0; transform: translate(-50%, 10px); }
+  35%, 78% { opacity: 1; }
+  100% { opacity: 0; transform: translate(-50%, -15px); }
+}
+@keyframes duel-lunge {
+  0%, 100% { transform: none; }
+  20% { transform: translateX(calc(var(--direction) * -5%)) rotate(calc(var(--direction) * -4deg)); }
+  47% { transform: translateX(calc(var(--direction) * 24%)) rotate(calc(var(--direction) * 7deg)); }
+  70% { transform: translateX(calc(var(--direction) * 16%)); }
+}
+@keyframes duel-brace {
+  0%, 100% { transform: none; }
+  48% { transform: scale(.98, .94) translateX(calc(var(--direction) * -5%)); }
+}
+@keyframes duel-cast {
+  0%, 100% { transform: none; }
+  50% { transform: translateY(-3%) scale(1.03); }
+}
+@keyframes duel-recoil {
+  0%, 100% { transform: none; }
+  33% { transform: translateX(calc(var(--direction) * -10%)) rotate(calc(var(--direction) * -4deg)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .duel-effects { display: none; }
+}

@@ -1,0 +1,282 @@
+.duel-page {
+  --card-width: clamp(82px, 8.6vw, 105px);
+  --card-height: clamp(111px, 11vw, 139px);
+  --player-x: 30%;
+  --computer-x: 70%;
+  background: radial-gradient(ellipse at 50% 14%, #282d22, #141a15 55%, #101510 100%);
+}
+.duel-page .masthead-inner { min-height: 63px; }
+.masthead-identity { display: flex; align-items: center; gap: clamp(10px, 2vw, 24px); }
+.duel-page .battle-home {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  min-width: 104px;
+  min-height: 44px;
+  gap: 7px;
+  padding-inline: 10px;
+  color: #f6ddaf;
+  white-space: nowrap;
+}
+.duel-page .battle-home:hover { background: #403823; border-color: #d5b173; }
+.masthead-identity .brand h1 { font-size: clamp(1.05rem, 2.25vw, 1.8rem); }
+.duel-page .game-layout { max-width: 1256px; padding-top: 17px; }
+.duel-page .board { min-height: 0; grid-template-rows: auto auto auto auto; border-radius: 6px; }
+.duel-page .fighter {
+  gap: clamp(9px, 2vw, 24px);
+  grid-template-columns: minmax(118px, 154px) minmax(0, 1fr);
+  padding: 9px 20px;
+}
+.duel-page .fighter-computer { background: linear-gradient(95deg, #332a20, #1d261e 75%); }
+.duel-page .fighter-player { background: linear-gradient(95deg, #2b3728, #1c271d 75%); }
+.duel-page .fighter-profile h2 { font-size: clamp(1.03rem, 1.8vw, 1.45rem); margin-bottom: 7px; }
+.duel-page .hand { justify-content: safe center; gap: 8px; }
+
+.duel-page .card {
+  display: flex;
+  align-items: end;
+  isolation: isolate;
+  border-radius: 6px;
+  border-color: rgba(var(--aura), .74);
+}
+.duel-page .card::after { z-index: 1; border-color: rgba(var(--aura), .24); }
+.duel-page .card-art {
+  position: absolute;
+  inset: 0;
+  display: block;
+  padding: 0;
+  z-index: -2;
+}
+.duel-page .card-art img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 43%;
+  filter: none;
+}
+.duel-page .card-caption {
+  width: 100%;
+  min-height: 39px;
+  padding: 5px 4px 5px;
+  background: linear-gradient(0deg, #101611 18%, #111612de 66%, #12181000);
+  text-shadow: 0 1px 5px #030502;
+}
+.duel-page .card-title { color: #fff5df; font: 750 .94rem/1.2 var(--serif); }
+.duel-page .card-effect { font-size: .71rem; }
+.duel-page button.card.unaffordable { opacity: .76; }
+
+.duel-page .progress-fill {
+  width: 100%;
+  transform: scaleX(var(--fill, 0));
+  transform-origin: left center;
+  transition: transform .24s ease-out;
+}
+
+.duel-page .arena {
+  align-items: center;
+  grid-template-columns: minmax(0, 1fr) minmax(230px, 1fr);
+  gap: 8px 14px;
+  padding: 8px 9px;
+  background: #181e16;
+}
+.duel-page .arena::before, .duel-page .arena::after { display: none; }
+
+.duel-stage {
+  position: relative;
+  isolation: isolate;
+  grid-column: 1 / -1;
+  min-height: clamp(248px, 30vw, 365px);
+  overflow: hidden;
+  border: 1px solid #b4996077;
+  border-radius: 4px;
+  background:
+    linear-gradient(0deg, #121710a8 0%, transparent 31%, #11160f22 80%, #14191163),
+    url("assets/duel/scene.webp") center 62% / cover,
+    #283427;
+}
+.duel-stage::before {
+  position: absolute;
+  z-index: 1;
+  inset: 5px;
+  border: 1px solid #d8b57b30;
+  content: "";
+  pointer-events: none;
+}
+.duel-unit {
+  --accent: #d5e5d1;
+  --direction: 1;
+  position: absolute;
+  inset: auto auto 11% var(--player-x);
+  width: min(27%, 230px);
+  height: 85%;
+  transform: translateX(-50%);
+}
+.duel-unit[data-side="computer"] {
+  --accent: #f5cc9d;
+  --direction: -1;
+  left: var(--computer-x);
+}
+.duel-sprite {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: end center;
+  transform-origin: center bottom;
+  transition: filter .25s ease, opacity .25s ease, transform .25s ease;
+}
+.duel-sprite img {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  object-fit: contain;
+  object-position: center bottom;
+  filter: drop-shadow(0 5px 5px #070d07ab);
+}
+.duel-unit[data-defeated="true"] .duel-sprite {
+  opacity: .38;
+  filter: grayscale(.92);
+  transform: translateY(8%) skewX(-8deg) scale(.88);
+}
+.duel-shadow {
+  position: absolute;
+  left: 10%;
+  bottom: -1%;
+  width: 80%;
+  height: 11%;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, #060a05bd 12%, #0a0d0a72 54%, transparent 72%);
+}
+.duel-name {
+  position: absolute;
+  z-index: 1;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 1px 10px;
+  border-top: 1px solid #c4af756e;
+  color: var(--accent);
+  background: #0c130ed6;
+  font: 700 clamp(.73rem, 1.2vw, .94rem)/1.32 var(--serif);
+  letter-spacing: .06em;
+  white-space: nowrap;
+}
+.duel-charge {
+  position: absolute;
+  left: 19%;
+  bottom: 0;
+  width: 62%;
+  height: 14%;
+  border: 1px solid #ffd17c;
+  border-radius: 50%;
+  opacity: 0;
+  box-shadow: 0 0 12px #ed9d4e, inset 0 0 14px #db822e9c;
+  transition: opacity .25s ease;
+}
+.duel-unit[data-charged="true"] .duel-charge,
+.duel-unit[data-acting="charge"] .duel-charge { opacity: .9; }
+.duel-ward {
+  position: absolute;
+  z-index: 2;
+  inset: 12% 4% 4%;
+  border: 1px solid #9ce0b49c;
+  border-radius: 52%;
+  background: radial-gradient(ellipse, transparent 50%, #77cc981d);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .15s ease;
+}
+.duel-unit[data-ward="true"] .duel-ward { opacity: .62; }
+.duel-unit[data-guard="true"] .duel-ward {
+  border-color: #d8f6ff;
+  box-shadow: 0 0 20px #85d4ffaa, inset 0 0 21px #5fb5e08c;
+  background: radial-gradient(ellipse, transparent 32%, #73b9e43f);
+  opacity: .92;
+}
+
+.duel-page .journal {
+  align-self: stretch;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
+}
+.duel-page .journal-head { padding: 1px 2px 5px; }
+.duel-page .journal-head h2 { color: #dbc9a8; font-size: .87rem; }
+.duel-page .recent-moves { padding: 0; gap: 5px; }
+.duel-page .recent-move {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 2px 7px;
+  align-items: baseline;
+  padding: 5px 7px;
+  border-radius: 3px;
+}
+.duel-page .recent-move span { font-size: .71rem; }
+.duel-page .recent-move strong { font-size: .82rem; }
+.duel-page .journal-history summary { min-height: 28px; padding: 3px 2px; font-size: .74rem; }
+.duel-page .arena-center {
+  min-height: 0;
+  display: grid;
+  grid-template: auto auto / minmax(0, 1fr) auto;
+  gap: 2px 9px;
+  justify-content: stretch;
+  text-align: left;
+  padding-inline: 4px 2px;
+}
+.duel-page .arena-center h2 {
+  grid-column: 1;
+  grid-row: 1;
+  margin: 0;
+  font-size: clamp(1.15rem, 2vw, 1.55rem);
+  letter-spacing: .05em;
+}
+.duel-page .phase-detail {
+  grid-column: 1;
+  grid-row: 2;
+  min-height: 0;
+  margin: 0;
+  font-size: .81rem;
+}
+.duel-page .arena-center .button {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  min-height: 42px;
+  padding: 4px 9px;
+  white-space: nowrap;
+}
+
+@media (max-width: 620px) {
+  .duel-page { --player-x: 27%; --computer-x: 73%; --card-height: clamp(88px, 25vw, 115px); }
+  .duel-page .masthead-inner { min-height: 54px; }
+  .masthead-identity .brand-mark { display: none; }
+  .duel-page .game-layout { padding: 8px 8px 15px; }
+  .duel-page .fighter { padding: 6px 7px 2px; }
+  .duel-page .fighter-profile h2 { margin-bottom: 3px; }
+  .duel-page .hand { justify-content: flex-start; gap: 6px; }
+  .duel-page .card-title { font-size: .84rem; }
+  .duel-page .card-effect { font-size: .65rem; }
+  .duel-page .card-caption { min-height: 33px; }
+  .duel-page .hand[data-crowded="true"] { --card-height: clamp(90px, 25vw, 118px); gap: 0; }
+  .duel-page .hand[data-crowded="true"] .card:not(:last-child, :focus-visible) .card-art { padding: 0; }
+  .duel-page .hand[data-crowded="true"] .card:not(:last-child, :focus-visible) .card-art img { width: 100%; height: 100%; }
+  .duel-page .arena { grid-template-columns: minmax(0, 1fr); gap: 3px; padding: 5px 6px 6px; }
+  .duel-stage { min-height: clamp(168px, 49vw, 238px); }
+  .duel-unit { width: 38%; height: 84%; }
+  .duel-page .journal-head { padding: 1px 2px 4px; }
+  .duel-page .recent-move { padding: 4px 6px; }
+  .duel-page .arena-center { padding: 0 2px; }
+  .duel-page .arena-center .button { min-height: 44px; }
+  .duel-page .table-info { padding-block: 6px; }
+}
+@media (max-width: 420px) {
+  .masthead-identity .brand {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
