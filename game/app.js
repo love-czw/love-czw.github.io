@@ -1,33 +1,33 @@
-import { createBattleMotion } from "./duel.js?v=epic-2";
+import { createBattleMotion } from "./duel.js?v=epic-3";
 
 const computerName = document.getElementById("computer-title").textContent;
 
 const cards = [
-  { name: "普攻", cost: 1, art: "normal-attack.png", tone: "ember",
+  { name: "普攻", cost: 1, art: "normal-attack.webp", tone: "ember",
     rules: "造成 4 点伤害。蓄力后造成 9 点伤害。",
     detail: (fighter) => fighter.charged ? "伤害 9" : "伤害 4" },
-  { name: "格挡", cost: 2, art: "block.png", tone: "iron",
+  { name: "格挡", cost: 2, art: "block.webp", tone: "iron",
     rules: "亮牌时生效，挡住对手本轮的全部伤害和破盾。",
     detail: () => "格挡一回合" },
-  { name: "回能", cost: 0, art: "restore-mana.png", tone: "azure",
+  { name: "回能", cost: 0, art: "restore-mana.webp", tone: "azure",
     rules: "回复 3 点蓝。蓄力后回复 5 点蓝。",
     detail: (fighter) => fighter.charged ? "回复 5 蓝" : "回复 3 蓝" },
-  { name: "盾击", cost: 2, art: "shield-strike.png", tone: "gold",
+  { name: "盾击", cost: 2, art: "shield-strike.webp", tone: "gold",
     rules: "造成 4 点伤害。有盾时打 7 点。蓄力后额外造成 5 点伤害。",
     detail: (fighter) => "伤害 " + ((fighter.sp > 0 ? 7 : 4) + (fighter.charged ? 5 : 0)) },
-  { name: "破盾", cost: 1, art: "break-shield.png", tone: "ember",
+  { name: "破盾", cost: 1, art: "break-shield.webp", tone: "ember",
     rules: "清除对手的全部护盾。对手格挡时可以挡住这张牌。",
     detail: () => "清除护盾" },
-  { name: "架盾", cost: 2, art: "raise-shield.png", tone: "leaf",
+  { name: "架盾", cost: 2, art: "raise-shield.webp", tone: "leaf",
     rules: "增加 5 点护盾。",
     detail: () => "护盾 +5" },
-  { name: "补牌", cost: 1, art: "exchange.png", tone: "violet",
+  { name: "补牌", cost: 1, art: "exchange.webp", tone: "violet",
     rules: "摸 2 张牌。",
     detail: () => "摸 2 张" },
-  { name: "回复", cost: 1, art: "heal.png", tone: "leaf",
+  { name: "回复", cost: 1, art: "heal.webp", tone: "leaf",
     rules: "回复 3 点生命。蓄力后回复 5 点生命。",
     detail: (fighter) => fighter.charged ? "回血 5" : "回血 3" },
-  { name: "蓄力", cost: 1, art: "charge.png", tone: "gold",
+  { name: "蓄力", cost: 1, art: "charge.webp", tone: "gold",
     rules: "保存一层蓄力，可跨回合保留。下一张普攻、盾击、回能或回复会获得强化。",
     detail: (fighter) => fighter.charged ? "已存一层" : "蓄力一层" }
 ];
@@ -109,6 +109,8 @@ async function requestState(action) {
   if (pending) {
     return;
   }
+  const committed = action?.type === "play" ? dom.playerHand.children[action.index] : null;
+  if (committed) committed.dataset.committed = "true";
   window.clearTimeout(computerTimer);
   pending = true;
   error = "";
@@ -133,6 +135,7 @@ async function requestState(action) {
   } catch (reason) {
     error = reason instanceof Error ? reason.message : "本次操作失败，请重试。";
   } finally {
+    if (committed) delete committed.dataset.committed;
     pending = false;
     render();
     if (state?.phase === "computer" && !error) {
@@ -207,7 +210,7 @@ function makeHandCard(id, info, player) {
 
   const art = el("div", "card-art");
   const image = el("img");
-  image.src = "assets/duel/cards/" + info.art.replace(".png", ".webp");
+  image.src = "assets/duel/cards/" + info.art;
   image.alt = "";
   image.draggable = false;
   image.addEventListener("error", () => { image.hidden = true; }, { once: true });

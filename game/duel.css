@@ -65,6 +65,13 @@
 .duel-page .card-title { color: #fff5df; font: 750 .94rem/1.2 var(--serif); }
 .duel-page .card-effect { font-size: .71rem; }
 .duel-page button.card.unaffordable { opacity: .76; }
+.duel-page .player-hand button.card[data-committed="true"] {
+  z-index: 2;
+  border-color: #f0ca85;
+  outline: 2px solid #e4b96a;
+  outline-offset: -3px;
+  box-shadow: 0 0 11px #e7bb6f8f;
+}
 
 .duel-page .progress-fill {
   width: 100%;
@@ -80,9 +87,9 @@
   padding: 8px 9px;
   background: #181e16;
 }
-.duel-page .arena::before, .duel-page .arena::after { display: none; }
 
 .duel-stage {
+  --duel-background: url("assets/duel/scene.webp");
   position: relative;
   isolation: isolate;
   grid-column: 1 / -1;
@@ -92,7 +99,7 @@
   border-radius: 4px;
   background:
     linear-gradient(0deg, #121710a8 0%, transparent 31%, #11160f22 80%, #14191163),
-    url("assets/duel/scene.webp") center 62% / cover,
+    var(--duel-background) center 62% / cover,
     #283427;
 }
 .duel-stage::before {
@@ -262,7 +269,10 @@
   .duel-page .hand[data-crowded="true"] .card:not(:last-child, :focus-visible) .card-art { padding: 0; }
   .duel-page .hand[data-crowded="true"] .card:not(:last-child, :focus-visible) .card-art img { width: 100%; height: 100%; }
   .duel-page .arena { grid-template-columns: minmax(0, 1fr); gap: 3px; padding: 5px 6px 6px; }
-  .duel-stage { min-height: clamp(168px, 49vw, 238px); }
+  .duel-stage {
+    --duel-background: url("assets/duel/scene-mobile.webp");
+    min-height: clamp(168px, 49vw, 238px);
+  }
   .duel-unit { width: 38%; height: 84%; }
   .duel-page .journal-head { padding: 1px 2px 4px; }
   .duel-page .recent-move { padding: 4px 6px; }

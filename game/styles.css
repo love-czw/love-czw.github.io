@@ -363,25 +363,6 @@ button.card.unaffordable .card-cost {
   border-block: 1px solid rgba(220, 191, 130, .24);
   background: #1a281e;
 }
-.arena::before, .arena::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-}
-.arena::before {
-  background:
-    linear-gradient(90deg, #131e17cf 1%, #1a231ac7 28%, #151b12b0 71%, #15231bc9),
-    linear-gradient(0deg, #1d3024b5, #2b342715 42%, #19231a58),
-    url("assets/arena.jpg") center 53% / cover;
-}
-.arena::after {
-  inset: 9px;
-  border: 1px solid #b3976133;
-  border-radius: 3px;
-  background: radial-gradient(ellipse at center, transparent 28%, #09150f55);
-}
 .arena-center {
   align-self: center;
   min-width: 0;
@@ -620,7 +601,6 @@ dialog p { color: #dee2d1; margin: 1rem 0; }
     gap: 4px;
     padding: 8px;
   }
-  .arena::after { inset: 6px; }
   .arena-center {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
