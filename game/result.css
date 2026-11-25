@@ -1,0 +1,91 @@
+#battle-result {
+  --result-art: url("assets/duel/scene.webp");
+  --result-title: #f6d796;
+  --result-line: #c69651b3;
+  --result-glow: #74502638;
+  --result-shade: #14150ff2;
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  height: 100dvh;
+  max-height: none;
+  margin: 0;
+  padding: clamp(16px, 5vw, 64px);
+  overflow: auto;
+  border: 0;
+  border-radius: 0;
+  background: radial-gradient(ellipse at center, var(--result-glow), var(--result-shade) 79%),
+    linear-gradient(0deg, #0c100cf5 3%, #15180eac 37%, #10161094 70%, #0d100dbb),
+    var(--result-art) center / cover, #111510;
+  color: var(--ink);
+}
+#battle-result[open] {
+  display: grid;
+  place-items: center;
+  animation: result-appear .24s ease-out both;
+}
+#battle-result[data-outcome="defeat"] {
+  --result-title: #ebbbb3;
+  --result-line: #ad6b63b0;
+  --result-glow: #68292854;
+  --result-shade: #180e10f7;
+}
+.result-review {
+  position: absolute;
+  inset: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) auto auto;
+  z-index: 1;
+}
+.result-review .button { min-height: 44px; }
+.result-banner {
+  width: min(100%, 940px);
+  margin-block: 48px 18px;
+  padding: clamp(28px, 6vw, 70px) 3px;
+  border-block: 1px solid var(--result-line);
+  text-align: center;
+  background: radial-gradient(ellipse at center, #11130df0, #12140e41 72%, transparent);
+}
+#result-title {
+  margin: 0;
+  padding-inline-start: .06em;
+  color: var(--result-title);
+  font: 700 clamp(2.45rem, 12vw, 9rem)/1 Georgia, "Times New Roman", serif;
+  letter-spacing: .06em;
+  text-shadow: 0 2px 0 #160f0b, 0 6px 28px #030502, 0 0 30px var(--result-glow);
+}
+#result-detail {
+  margin: 14px 0 clamp(22px, 4vw, 38px);
+  color: #eee3ce;
+  font-weight: 650;
+  font-size: clamp(.94rem, 2.2vw, 1.28rem);
+}
+.result-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+.result-actions .button {
+  display: inline-flex;
+  min-width: 104px;
+  min-height: 46px;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+#battle-result[data-outcome="defeat"] .button-primary {
+  background: #d79689;
+  border-color: #e7aea3;
+}
+#battle-result[data-outcome="defeat"] .button-primary:hover:not(:disabled) { background: #f0b8ad; }
+@keyframes result-appear {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@media (max-width: 620px) {
+  #battle-result { --result-art: url("assets/duel/scene-mobile.webp"); }
+}
+@media (prefers-reduced-motion: reduce) {
+  #battle-result[open] { animation: none; }
+}

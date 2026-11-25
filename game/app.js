@@ -54,7 +54,11 @@ const dom = {
   latestComputer: document.getElementById("latest-computer"),
   notice: document.getElementById("notice"),
   rules: document.getElementById("rules"),
-  rulesList: document.getElementById("rules-list")
+  rulesList: document.getElementById("rules-list"),
+  result: document.getElementById("battle-result"),
+  resultTitle: document.getElementById("result-title"),
+  resultDetail: document.getElementById("result-detail"),
+  resultReplay: document.getElementById("result-replay")
 };
 
 const battleMotion = createBattleMotion(document.querySelector(".duel-stage"));
@@ -66,6 +70,7 @@ let error = "";
 let computerTimer = 0;
 let visibleLog = "";
 let match = null;
+let presentedResult = false;
 
 function el(tag, className, content) {
   const element = document.createElement(tag);
@@ -290,6 +295,7 @@ function updateControls() {
   dom.pass.disabled = pending || Boolean(error) || state?.phase !== "play";
   dom.restart.disabled = pending || !state;
   dom.playAgain.disabled = pending || !state;
+  dom.resultReplay.disabled = pending;
   dom.retry.disabled = pending;
 
   const discardMode = state?.phase === "discard";
@@ -300,6 +306,26 @@ function updateControls() {
     button.disabled = pending || Boolean(error) || !(discardMode || canPlay);
     button.classList.toggle("unaffordable", state.phase === "play" && tooExpensive);
   }
+}
+
+function renderResult() {
+  if (state.phase !== "finished") {
+    presentedResult = false;
+    if (dom.result.open) {
+      dom.result.close();
+      dom.pass.focus({ preventScroll: true });
+    }
+    return;
+  }
+  if (presentedResult) return;
+
+  const won = state.winner === "player";
+  dom.result.dataset.outcome = won ? "victory" : "defeat";
+  dom.resultTitle.textContent = won ? "VICTORY" : "DEFEAT";
+  dom.resultDetail.textContent = won ? "你击败了" + computerName : computerName + "赢下了这局";
+  if (dom.rules.open) dom.rules.close();
+  dom.result.showModal();
+  presentedResult = true;
 }
 
 function render() {
@@ -353,6 +379,7 @@ function render() {
   renderReveal(state.revealed);
   renderJournal(state.log);
   updateControls();
+  renderResult();
 }
 
 for (const card of cards) {
@@ -369,5 +396,9 @@ dom.journalScroll.closest("details").addEventListener("toggle", () => {
 dom.pass.addEventListener("click", () => requestState({ type: "pass" }));
 dom.restart.addEventListener("click", () => requestState({ type: "restart" }));
 dom.playAgain.addEventListener("click", () => requestState({ type: "restart" }));
+dom.resultReplay.addEventListener("click", () => requestState({ type: "restart" }));
+dom.result.addEventListener("close", () => {
+  if (state?.phase === "finished") dom.phaseTitle.focus({ preventScroll: true });
+});
 dom.retry.addEventListener("click", () => requestState());
 requestState();

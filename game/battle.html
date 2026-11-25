@@ -10,13 +10,14 @@
   <link rel="stylesheet" href="styles.css?v=epic-3">
   <link rel="stylesheet" href="duel.css?v=epic-3">
   <link rel="stylesheet" href="duel-effects.css?v=epic-3">
-  <script type="module" src="app.js?v=epic-3"></script>
+  <link rel="stylesheet" href="result.css?v=epic-4">
+  <script type="module" src="app.js?v=epic-4"></script>
 </head>
 <body class="duel-page">
   <header class="masthead">
     <div class="masthead-inner">
       <div class="masthead-identity">
-        <a class="button button-outline battle-home" href="./?v=epic-3">
+        <a class="button button-outline battle-home" href="./?v=epic-4">
           <span aria-hidden="true">←</span> 返回大厅
         </a>
         <div class="brand">
@@ -82,7 +83,7 @@
           <p class="notice" id="notice" role="status" hidden></p>
         </section>
         <div class="arena-center">
-          <h2 id="phase-title" aria-live="polite">准备对局</h2>
+          <h2 id="phase-title" aria-live="polite" tabindex="-1">准备对局</h2>
           <p id="phase-detail" class="phase-detail">正在载入对局。</p>
           <button type="button" id="pass" class="button button-pass" hidden>跳过出牌</button>
           <button type="button" id="play-again" class="button button-primary" hidden>再开一局</button>
@@ -106,6 +107,20 @@
 
   </main>
 
+  <dialog id="battle-result" aria-labelledby="result-title" aria-describedby="result-detail">
+    <form class="result-review" method="dialog">
+      <button class="button button-quiet" id="result-review" type="submit" autofocus>查看对局</button>
+    </form>
+    <div class="result-banner">
+      <h2 id="result-title" lang="en"></h2>
+      <p id="result-detail"></p>
+      <div class="result-actions">
+        <button class="button button-primary" id="result-replay" type="button">再开一局</button>
+        <a class="button button-outline" id="result-home" href="./?v=epic-4">返回大厅</a>
+      </div>
+    </div>
+  </dialog>
+
   <dialog id="rules">
     <div class="rules-head">
       <h2>玩法</h2>
@@ -117,7 +132,7 @@
     <p>格挡在亮牌时对双方同时生效，本轮结束时失效。其余牌先结算你的行动，再结算电脑的行动。生命降到 0 时立即结束。各自在回合末回 1 蓝、摸 1 张，超过 6 张就弃至 6 张。</p>
     <p>蓝量上限 7，护盾先吸收伤害。牌堆摸空时，洗回弃牌堆。先把对手打到 0 血就赢。</p>
     <div class="rules-list" id="rules-list"></div>
-    <a class="credit-link" href="credits.html?v=epic-3">查看美术素材来源</a>
+    <a class="credit-link" href="credits.html?v=epic-4">查看美术素材来源</a>
   </dialog>
 </body>
 </html>
