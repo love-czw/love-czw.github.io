@@ -35,10 +35,10 @@ const cards = [
 const dom = {
   board: document.getElementById("board"),
   turn: document.getElementById("turn-label"),
-  phaseTitle: document.getElementById("phase-title"),
-  phaseDetail: document.getElementById("phase-detail"),
   draw: document.getElementById("draw-count"),
   discard: document.getElementById("discard-count"),
+  phaseTitle: document.getElementById("phase-title"),
+  phaseDetail: document.getElementById("phase-detail"),
   computerHand: document.getElementById("computer-hand"),
   playerHand: document.getElementById("player-hand"),
   computerStats: document.getElementById("computer-stats"),
@@ -49,6 +49,8 @@ const dom = {
   retry: document.getElementById("retry"),
   journalScroll: document.getElementById("journal-scroll"),
   journalEvents: document.getElementById("journal-events"),
+  latestPlayer: document.getElementById("latest-player"),
+  latestComputer: document.getElementById("latest-computer"),
   notice: document.getElementById("notice"),
   rules: document.getElementById("rules"),
   rulesList: document.getElementById("rules-list")
@@ -158,6 +160,9 @@ function renderStats(container, fighter) {
 
 function renderHand(container, fighter, player) {
   const previousScroll = container.scrollLeft;
+  const handCount = fighter.hand.length;
+  container.style.setProperty("--spread-steps", Math.max(1, Math.min(handCount, 6) - 1));
+  container.dataset.crowded = String(handCount >= 5);
   const list = document.createDocumentFragment();
 
   fighter.hand.forEach((id, index) => {
@@ -217,15 +222,26 @@ function renderJournal(records) {
   }
   visibleLog = key;
 
+  const moves = { player: "待出牌", computer: "待出牌" };
   const rows = document.createDocumentFragment();
   const sideNames = { player: "你", computer: computerName, system: "对局" };
   for (const event of events) {
+    if (event.side === "player" || event.side === "computer") {
+      const card = event.text.match(/打出了「([^」]+)」/);
+      if (card) {
+        moves[event.side] = card[1];
+      } else if (event.text.includes("跳过出牌")) {
+        moves[event.side] = "跳过";
+      }
+    }
     const row = el("li", "journal-event");
     row.dataset.side = event.side;
     row.append(el("span", "actor", sideNames[event.side] || "对局"),
                el("p", "event-text", event.text));
     rows.append(row);
   }
+  dom.latestPlayer.textContent = moves.player;
+  dom.latestComputer.textContent = moves.computer;
   dom.journalEvents.replaceChildren(rows);
   dom.journalScroll.scrollTop = dom.journalScroll.scrollHeight;
 }
@@ -263,7 +279,6 @@ function render() {
   }
 
   dom.board.dataset.phase = state.phase;
-  dom.turn.hidden = false;
   dom.turn.textContent = "第 " + state.turn + " 回合";
   dom.draw.textContent = state.deckCount;
   dom.discard.textContent = state.discardCount;
@@ -272,7 +287,7 @@ function render() {
     case "play":
       dom.phaseTitle.textContent = "你的回合";
       dom.phaseDetail.textContent = state.player.hand.length
-        ? "点一张手牌出牌，或跳过本回合。"
+        ? "点一张手牌出牌。"
         : "手牌为空，可以跳过并摸牌。";
       dom.pass.hidden = Boolean(error);
       break;
@@ -307,6 +322,9 @@ for (const card of cards) {
 }
 
 document.getElementById("show-rules").addEventListener("click", () => dom.rules.showModal());
+dom.journalScroll.closest("details").addEventListener("toggle", () => {
+  dom.journalScroll.scrollTop = dom.journalScroll.scrollHeight;
+});
 dom.pass.addEventListener("click", () => requestState({ type: "pass" }));
 dom.restart.addEventListener("click", () => requestState({ type: "restart" }));
 dom.playAgain.addEventListener("click", () => requestState({ type: "restart" }));

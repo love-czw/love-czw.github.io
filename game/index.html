@@ -6,8 +6,8 @@
   <meta name="theme-color" content="#101714">
   <meta name="description" content="愚蠢的博弈游戏是一款回合制人机卡牌游戏。看见对手的牌，再猜它下一手怎么打。">
   <title>愚蠢的博弈游戏</title>
-  <link rel="stylesheet" href="styles.css?v=xiaobei-1">
-  <script defer src="app.js?v=xiaobei-1"></script>
+  <link rel="stylesheet" href="styles.css?v=fan-1">
+  <script defer src="app.js?v=fan-1"></script>
 </head>
 <body>
   <header class="masthead">
@@ -37,27 +37,34 @@
       </section>
 
       <section class="arena" aria-label="对战区">
-        <div class="pile-area">
-          <div class="pile">
-            <span class="pile-stack" aria-hidden="true"><i></i><i></i><i></i></span>
-            <span class="pile-number" id="draw-count">—</span>
-            <span class="pile-label">抽牌堆</span>
+        <section class="journal" aria-labelledby="journal-title">
+          <div class="journal-head">
+            <h2 id="journal-title">对局记录</h2>
           </div>
-        </div>
+          <div class="recent-moves" aria-label="双方最近出牌" aria-live="polite">
+            <div class="recent-move recent-player">
+              <span>你</span>
+              <strong id="latest-player">待出牌</strong>
+            </div>
+            <div class="recent-move recent-computer">
+              <span>邪恶的小北</span>
+              <strong id="latest-computer">待出牌</strong>
+            </div>
+          </div>
+          <details class="journal-history">
+            <summary>完整记录</summary>
+            <div id="journal-scroll" class="journal-scroll" tabindex="0" aria-label="历史出牌">
+              <ol class="journal-events" id="journal-events"></ol>
+            </div>
+          </details>
+          <p class="notice" id="notice" role="status" hidden></p>
+        </section>
         <div class="arena-center">
-          <div class="turn-label" id="turn-label" hidden></div>
           <h2 id="phase-title" aria-live="polite">准备对局</h2>
           <p id="phase-detail" class="phase-detail">正在载入对局。</p>
           <button type="button" id="pass" class="button button-pass" hidden>跳过出牌</button>
           <button type="button" id="play-again" class="button button-primary" hidden>再开一局</button>
           <button type="button" id="retry" class="button button-outline" hidden>重新载入</button>
-        </div>
-        <div class="pile-area">
-          <div class="pile pile-discard">
-            <span class="pile-stack" aria-hidden="true"><i></i><i></i><i></i></span>
-            <span class="pile-number" id="discard-count">—</span>
-            <span class="pile-label">弃牌堆</span>
-          </div>
         </div>
       </section>
 
@@ -68,18 +75,13 @@
         </div>
         <div id="player-hand" class="hand player-hand" aria-label="你的手牌"></div>
       </section>
+      <footer class="table-info" aria-label="回合与牌堆信息">
+        <span class="turn-label" id="turn-label">第 1 回合</span>
+        <span>抽牌堆 <strong id="draw-count">—</strong></span>
+        <span>弃牌堆 <strong id="discard-count">—</strong></span>
+      </footer>
     </section>
 
-    <aside class="journal" aria-labelledby="journal-title">
-      <div class="journal-head">
-        <h2 id="journal-title">对局记录</h2>
-        <span class="journal-mark" aria-hidden="true"></span>
-      </div>
-      <div id="journal-scroll" class="journal-scroll">
-        <ol class="journal-events" id="journal-events" aria-live="polite" aria-relevant="additions"></ol>
-      </div>
-      <p class="notice" id="notice" role="status" hidden></p>
-    </aside>
   </main>
 
   <dialog id="rules">
