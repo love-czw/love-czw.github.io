@@ -1,5 +1,7 @@
 "use strict";
 
+const computerName = document.getElementById("computer-title").textContent;
+
 const cards = [
   { name: "普攻", cost: 1, art: "normal-attack.png", tone: "ember",
     rules: "造成 4 点伤害。蓄力后造成 9 点伤害。",
@@ -79,8 +81,10 @@ function isValidState(next) {
 async function getMatch() {
   if (!match) {
     try {
-      const { default: createEngine } = await import("./game-engine.js");
-      const engine = await createEngine();
+      const { default: createEngine } = await import("./game-engine.js?v=xiaobei-1");
+      const engine = await createEngine({
+        locateFile: (file, prefix) => prefix + file + "?v=xiaobei-1"
+      });
       match = new engine.PreviewMatch();
     } catch {
       throw new Error("对局引擎载入失败，请刷新页面重试。");
@@ -214,7 +218,7 @@ function renderJournal(records) {
   visibleLog = key;
 
   const rows = document.createDocumentFragment();
-  const sideNames = { player: "你", computer: "电脑", system: "对局" };
+  const sideNames = { player: "你", computer: computerName, system: "对局" };
   for (const event of events) {
     const row = el("li", "journal-event");
     row.dataset.side = event.side;
@@ -274,14 +278,14 @@ function render() {
       break;
     case "discard":
       dom.phaseTitle.textContent = "选择弃牌";
-      dom.phaseDetail.textContent = "点击手牌，弃到 6 张后继续。";
+      dom.phaseDetail.textContent = "手牌 " + state.player.hand.length + " 张，点牌弃到 6 张。";
       break;
     case "computer":
-      dom.phaseTitle.textContent = "电脑回合";
-      dom.phaseDetail.textContent = "电脑正在选牌。";
+      dom.phaseTitle.textContent = "对手回合";
+      dom.phaseDetail.textContent = computerName + "正在选牌。";
       break;
     case "finished":
-      dom.phaseTitle.textContent = state.winner === "player" ? "你赢了" : "电脑获胜";
+      dom.phaseTitle.textContent = state.winner === "player" ? "你赢了" : computerName + "获胜";
       dom.phaseDetail.textContent = "本局结束。";
       dom.playAgain.hidden = Boolean(error);
       break;
