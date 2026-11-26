@@ -168,7 +168,7 @@ button { font: inherit; }
   background: #201e19ed;
   font-size: .69rem;
 }
-.mode:is(.mode-ai, .mode-duel) .mode-status { border-color: #90a686; color: #e0f0d5; background: #233227; }
+.mode:is(.mode-ai, .mode-duel, .mode-boss) .mode-status { border-color: #90a686; color: #e0f0d5; background: #233227; }
 .mode-status i { width: 6px; height: 6px; border-radius: 50%; background: #bcd5a3; }
 .mode-copy { display: grid; gap: 4px; max-width: calc(100% - 25px); }
 .mode-copy strong { font: 750 clamp(1.22rem, 1.75vw, 1.7rem)/1.1 var(--serif); }
@@ -198,12 +198,6 @@ dialog::backdrop { background: #090d0cd9; }
 dialog[data-panel="rules"] { --dialog-art: url("assets/lobby/cards.webp"); }
 dialog[data-panel="duel"] { --dialog-art: url("assets/lobby/duel.webp"); }
 dialog[data-panel="tower"] { --dialog-art: url("assets/lobby/tower.webp"); }
-dialog[data-panel="boss"] .dialog-art {
-  height: clamp(184px, 51dvh, 360px);
-  background:
-    url("assets/duel/colossus.webp") center 10px / auto calc(100% - 16px) no-repeat,
-    radial-gradient(ellipse at 50% 48%, #755031, #2a2520 50%, #191e19 82%);
-}
 .dialog-body { padding: 0 24px 24px; }
 .dialog-body h2 { margin: 0; font: 750 1.7rem/1.25 var(--serif); }
 .dialog-body p { color: #e1d7c2; line-height: 1.7; margin: 8px 0 18px; }

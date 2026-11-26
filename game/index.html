@@ -7,8 +7,8 @@
   <meta name="description" content="愚蠢的博弈游戏。手牌公开，行动暗选。选一张牌，和均衡的小北较量。">
   <title>愚蠢的博弈游戏</title>
   <link rel="icon" type="image/png" href="assets/shield-strike.png">
-  <link rel="stylesheet" href="lobby.css?v=fighter-status-1">
-  <script src="lobby.js?v=fighter-status-1" defer></script>
+  <link rel="stylesheet" href="lobby.css?v=boss-1">
+  <script src="lobby.js?v=boss-1" defer></script>
 </head>
 <body>
   <header class="topbar">
@@ -32,7 +32,7 @@
     <section class="modes" aria-labelledby="modes-title">
       <h2 id="modes-title">选择模式</h2>
       <div class="mode-grid">
-        <a class="mode mode-ai" href="battle.html?v=fighter-status-1" aria-labelledby="ai-label" aria-describedby="ai-detail">
+        <a class="mode mode-ai" href="battle.html?v=boss-1" aria-labelledby="ai-label" aria-describedby="ai-detail">
           <span class="mode-art"></span>
           <span class="mode-status"><i aria-hidden="true"></i>可游玩</span>
           <span class="mode-copy">
@@ -41,7 +41,7 @@
           </span>
           <span class="mode-arrow" aria-hidden="true">↗</span>
         </a>
-        <a class="mode mode-duel" href="battle.html?mode=pvp&amp;v=fighter-status-1"
+        <a class="mode mode-duel" href="battle.html?mode=pvp&amp;v=boss-1"
            aria-labelledby="duel-label" aria-describedby="duel-status">
           <span class="mode-art"></span>
           <span class="mode-status" id="duel-status"><i aria-hidden="true"></i>可游玩</span>
@@ -61,16 +61,16 @@
           </span>
           <span class="mode-arrow" aria-hidden="true">↗</span>
         </button>
-        <button class="mode mode-boss" type="button" data-dialog="boss"
+        <a class="mode mode-boss" href="boss.html?v=boss-1"
                 aria-labelledby="boss-label" aria-describedby="boss-status">
           <span class="mode-art"></span>
-          <span class="mode-status" id="boss-status">筹备中</span>
+          <span class="mode-status" id="boss-status"><i aria-hidden="true"></i>可游玩</span>
           <span class="mode-copy">
             <strong id="boss-label">限时 Boss</strong>
             <span>挑战巨像</span>
           </span>
           <span class="mode-arrow" aria-hidden="true">↗</span>
-        </button>
+        </a>
       </div>
     </section>
   </main>

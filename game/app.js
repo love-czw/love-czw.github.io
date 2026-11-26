@@ -1,8 +1,10 @@
 import { createBattleMotion } from "./duel.js?v=fighter-status-1";
 import { initRoom, orientMatch } from "./room.js?v=rooms-live-1";
 
-const onlineMode = new URLSearchParams(location.search).get("mode") === "pvp";
+const bossMode = document.body.classList.contains("boss-page");
+const onlineMode = !bossMode && new URLSearchParams(location.search).get("mode") === "pvp";
 const computerName = onlineMode ? "对手" : document.getElementById("computer-title").textContent;
+const bossDuration = 180_000;
 
 const cards = [
   { name: "普攻", cost: 1, art: "normal-attack.webp", tone: "ember",
@@ -45,6 +47,7 @@ const dom = {
   playerHand: document.getElementById("player-hand"),
   computerStats: document.getElementById("computer-stats"),
   playerStats: document.getElementById("player-stats"),
+  bossTime: document.getElementById("boss-time"),
   pass: document.getElementById("pass"),
   restart: document.getElementById("restart"),
   playAgain: document.getElementById("play-again"),
@@ -78,6 +81,8 @@ let roomSnapshot = null;
 let incomingRoom = null;
 let processingRoom = false;
 let committedRoomCard = null;
+let bossDeadline = 0;
+let bossTimer = 0;
 
 function el(tag, className, content) {
   const element = document.createElement(tag);
@@ -105,11 +110,11 @@ function isValidState(next) {
 async function getMatch() {
   if (!match) {
     try {
-      const { default: createEngine } = await import("./game-engine.js?v=fighter-status-1");
+      const { default: createEngine } = await import("./game-engine.js?v=boss-1");
       const engine = await createEngine({
-        locateFile: (file, prefix) => prefix + file + "?v=fighter-status-1"
+        locateFile: (file, prefix) => prefix + file + "?v=boss-1"
       });
-      match = new engine.PreviewMatch();
+      match = bossMode ? new engine.BossMatch() : new engine.PreviewMatch();
     } catch {
       throw new Error("对局引擎载入失败，请刷新页面重试。");
     }
@@ -117,10 +122,45 @@ async function getMatch() {
   return match;
 }
 
+function stopBossTimer() {
+  window.clearInterval(bossTimer);
+  bossDeadline = 0;
+}
+
+function updateBossTimer() {
+  if (!bossDeadline) return;
+  const seconds = Math.max(0, Math.ceil((bossDeadline - Date.now()) / 1000));
+  const minutes = String(Math.floor(seconds / 60)).padStart(2, "0");
+  const remainder = String(seconds % 60).padStart(2, "0");
+  updateText(dom.bossTime, minutes + ":" + remainder);
+  dom.bossTime.dataset.urgent = String(seconds <= 30);
+  if (!seconds && !pending && !error) void requestState({ type: "timeout" });
+}
+
+function syncBossTimer(restart) {
+  if (state.phase === "finished") {
+    stopBossTimer();
+    if (state.timedOut) {
+      updateText(dom.bossTime, "00:00");
+      dom.bossTime.dataset.urgent = "true";
+    }
+    return;
+  }
+  if (restart) stopBossTimer();
+  if (!bossDeadline && state.phase === "play") {
+    bossDeadline = Date.now() + bossDuration;
+    bossTimer = window.setInterval(updateBossTimer, 250);
+  }
+  updateBossTimer();
+}
+
 async function requestState(action) {
   if (onlineMode) return requestRoomState(action);
   if (pending) {
     return;
+  }
+  if (bossDeadline && Date.now() >= bossDeadline && action?.type !== "restart") {
+    action = { type: "timeout" };
   }
   const committed = action?.type === "play" ? dom.playerHand.children[action.index] : null;
   if (committed) committed.dataset.committed = "true";
@@ -151,7 +191,8 @@ async function requestState(action) {
     if (committed) delete committed.dataset.committed;
     pending = false;
     render();
-    if (state?.phase === "computer" && !error) {
+    if (bossMode && state && !error) syncBossTimer(action?.type === "restart");
+    if (state?.phase === "computer" && !error && !pending) {
       computerTimer = window.setTimeout(() => requestState({ type: "computer" }), 48);
     }
   }
@@ -248,7 +289,7 @@ async function receiveRoom(room) {
   }
 }
 
-function statBar(label, max, kind) {
+function statBar(label, limit, kind) {
   const stat = el("div", "stat");
   const meta = el("div", "stat-label");
   const amount = el("strong");
@@ -257,15 +298,16 @@ function statBar(label, max, kind) {
   track.setAttribute("role", "progressbar");
   track.setAttribute("aria-label", label);
   track.setAttribute("aria-valuemin", "0");
-  track.setAttribute("aria-valuemax", max);
   const fill = el("span", "progress-fill progress-" + kind);
   track.append(fill);
   stat.append(meta, track);
   return {
     stat,
-    update(value) {
-      if (track.getAttribute("aria-valuenow") === String(value)) return;
+    update(value, max = limit) {
+      if (track.getAttribute("aria-valuenow") === String(value) &&
+          track.getAttribute("aria-valuemax") === String(max)) return;
       updateText(amount, value + "/" + max);
+      track.setAttribute("aria-valuemax", max);
       track.setAttribute("aria-valuenow", value);
       fill.style.setProperty("--fill", Math.max(0, Math.min(1, value / max)));
     }
@@ -283,7 +325,7 @@ function createFighterStats(container) {
   container.append(hp.stat, mp.stat, status);
   container.hidden = true;
   return fighter => {
-    hp.update(fighter.hp);
+    hp.update(fighter.hp, fighter.maxHp);
     mp.update(fighter.mp);
     updateText(ward, "护盾 " + fighter.sp);
     charge.hidden = !fighter.charged;
@@ -419,7 +461,7 @@ function renderResult() {
   }
   const won = state.winner === "player";
   const description = onlineMode ? (won ? "你赢下了这一局" : "对手赢下了这一局")
-    : (won ? "你击败了" + computerName : computerName + "赢下了这局");
+    : state.timedOut ? "时间耗尽，挑战失败。" : (won ? "你击败了" + computerName : computerName + "赢下了这局");
   if (onlineMode) {
     const replayReady = roomSnapshot.rematch[roomSnapshot.seat];
     dom.resultReplay.textContent = replayReady ? "等待好友" : "再开一局";
@@ -472,7 +514,7 @@ function render() {
       } else {
         dom.phaseTitle.textContent = "你的回合";
         dom.phaseDetail.textContent = state.player.hand.length
-          ? "对手已锁定行动。点一张手牌，或跳过。"
+          ? (bossMode ? "巨像已锁定行动。点一张手牌，或跳过。" : "对手已锁定行动。点一张手牌，或跳过。")
           : "手牌为空，可以跳过并摸牌。";
         dom.pass.hidden = Boolean(error);
       }
@@ -494,8 +536,8 @@ function render() {
       dom.phaseDetail.textContent = computerName + "正在结算已亮出的行动。";
       break;
     case "finished":
-      dom.phaseTitle.textContent = state.winner === "player" ? "你赢了" : computerName + "获胜";
-      dom.phaseDetail.textContent = "本局结束。";
+      dom.phaseTitle.textContent = state.timedOut ? "时间耗尽" : state.winner === "player" ? "你赢了" : computerName + "获胜";
+      dom.phaseDetail.textContent = state.timedOut ? "巨像仍然屹立。" : "本局结束。";
       dom.playAgain.hidden = Boolean(error);
       break;
   }
@@ -503,7 +545,7 @@ function render() {
   updateComputerStats(state.computer);
   updatePlayerStats(state.player);
   battleMotion.sync(state);
-  renderHand(dom.computerHand, state.computer, false);
+  if (dom.computerHand) renderHand(dom.computerHand, state.computer, false);
   renderHand(dom.playerHand, state.player, true);
   renderReveal(state.revealed);
   renderJournal(state.log);
@@ -530,6 +572,7 @@ dom.result.addEventListener("close", () => {
   if (state?.phase === "finished") dom.phaseTitle.focus({ preventScroll: true });
 });
 dom.retry.addEventListener("click", () => requestState());
+if (bossMode) document.addEventListener("visibilitychange", updateBossTimer);
 
 if (onlineMode) {
   document.title = "双人对战 · 愚蠢的博弈游戏";

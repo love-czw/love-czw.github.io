@@ -129,8 +129,16 @@
   inset: 0;
   display: grid;
   place-items: end center;
+  container-type: size;
   transform-origin: center bottom;
   transition: filter .25s ease, opacity .25s ease, transform .25s ease;
+}
+.duel-figure {
+  position: absolute;
+  inset: auto auto 0 50%;
+  width: min(100%, calc(100cqh * 473 / 710));
+  aspect-ratio: 473 / 710;
+  transform: translateX(-50%);
 }
 .duel-sprite img {
   position: relative;
@@ -205,20 +213,21 @@
 .fighter-shield {
   position: absolute;
   z-index: 2;
-  bottom: 20%;
-  left: 73%;
-  width: clamp(37px, 44%, 94px);
+  top: 29%;
+  left: 82%;
+  width: 38%;
   aspect-ratio: 227 / 320;
   opacity: 0;
-  transform: translateX(-50%) rotate(-6deg);
+  transform: translate(-50%, -50%) rotate(-12deg);
   background: url("assets/duel/fighter-ward.webp") center / contain no-repeat;
   filter: drop-shadow(0 0 4px #86eed766);
   transition: opacity .15s ease-out;
   pointer-events: none;
 }
 .duel-unit[data-side="computer"] .fighter-shield {
-  left: 27%;
-  transform: translateX(-50%) scaleX(-1) rotate(-6deg);
+  top: 26%;
+  left: 11%;
+  transform: translate(-50%, -50%) scaleX(-1) rotate(-12deg);
 }
 .duel-unit[data-shielded="true"] .fighter-shield { opacity: 1; }
 .duel-ward {

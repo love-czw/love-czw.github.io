@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101714">
+  <meta name="description" content="三分钟内击败巨像。巨像的行动会在你出牌后揭晓。">
+  <title>限时 Boss · 愚蠢的博弈游戏</title>
+  <link rel="icon" type="image/png" href="assets/shield-strike.png">
+  <link rel="stylesheet" href="styles.css?v=epic-3">
+  <link rel="stylesheet" href="duel.css?v=hand-shield-1">
+  <link rel="stylesheet" href="duel-effects.css?v=epic-3">
+  <link rel="stylesheet" href="result.css?v=epic-4">
+  <link rel="stylesheet" href="boss.css?v=boss-1">
+  <script type="module" src="app.js?v=boss-1"></script>
+</head>
+<body class="duel-page boss-page">
+  <header class="masthead">
+    <div class="masthead-inner">
+      <div class="masthead-identity">
+        <a class="button button-outline battle-home" href="./?v=boss-1">
+          <span aria-hidden="true">←</span> 返回大厅
+        </a>
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true"><i></i><i></i></span>
+          <h1>限时 Boss</h1>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="button button-quiet" id="show-rules" type="button">玩法</button>
+        <button class="button button-outline" id="restart" type="button" disabled>重开对局</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="game-layout">
+    <section class="board" id="board" aria-label="巨像战场" data-phase="loading">
+      <section class="fighter fighter-computer boss-hud" aria-labelledby="computer-title">
+        <h2 id="computer-title">巨像</h2>
+        <div id="computer-stats" class="fighter-stats" hidden></div>
+        <div class="boss-clock">
+          <span id="boss-time-label">剩余时间</span>
+          <strong id="boss-time" role="timer" aria-labelledby="boss-time-label">03:00</strong>
+        </div>
+      </section>
+
+      <section class="arena" aria-label="对战区">
+        <div class="duel-stage boss-stage" aria-hidden="true">
+          <div class="duel-unit" data-side="player"></div>
+          <div class="duel-unit boss-unit" data-side="computer">
+            <div class="duel-shadow"></div>
+            <div class="duel-sprite">
+              <div class="fighter-charge"></div>
+              <div class="duel-figure boss-figure">
+                <img src="assets/duel/colossus-battle.webp" width="1080" height="1080" alt="" draggable="false" fetchpriority="high">
+                <div class="fighter-shield"></div>
+              </div>
+            </div>
+            <div class="duel-ward"></div>
+          </div>
+          <div class="duel-effects"></div>
+        </div>
+        <section class="journal" aria-labelledby="journal-title">
+          <div class="journal-head">
+            <h2 id="journal-title">双方亮牌</h2>
+          </div>
+          <div class="recent-moves" aria-label="最近一次双方亮牌" aria-live="polite">
+            <div class="recent-move recent-player">
+              <span>你</span>
+              <strong id="latest-player">待亮牌</strong>
+            </div>
+            <div class="recent-move recent-computer">
+              <span id="recent-opponent-name">巨像</span>
+              <strong id="latest-computer">待亮牌</strong>
+            </div>
+          </div>
+          <details class="journal-history">
+            <summary>完整记录</summary>
+            <div id="journal-scroll" class="journal-scroll" tabindex="0" aria-label="历史出牌">
+              <ol class="journal-events" id="journal-events"></ol>
+            </div>
+          </details>
+          <p class="notice" id="notice" role="status" hidden></p>
+        </section>
+        <div class="arena-center">
+          <h2 id="phase-title" aria-live="polite" tabindex="-1">准备对局</h2>
+          <p id="phase-detail" class="phase-detail">正在载入对局。</p>
+          <button type="button" id="pass" class="button button-pass" hidden>跳过出牌</button>
+          <button type="button" id="play-again" class="button button-primary" hidden>再开一局</button>
+          <button type="button" id="retry" class="button button-outline" hidden>重新载入</button>
+        </div>
+      </section>
+
+      <section class="fighter fighter-player" aria-labelledby="player-title">
+        <div class="fighter-profile">
+          <h2 id="player-title">你</h2>
+          <div id="player-stats" class="fighter-stats"></div>
+        </div>
+        <div id="player-hand" class="hand player-hand" aria-label="你的手牌"></div>
+      </section>
+      <footer class="table-info" aria-label="回合与牌堆信息">
+        <span class="turn-label" id="turn-label">第 1 回合</span>
+        <span>抽牌堆 <strong id="draw-count">—</strong></span>
+        <span>弃牌堆 <strong id="discard-count">—</strong></span>
+      </footer>
+    </section>
+
+  </main>
+
+  <dialog id="battle-result" aria-labelledby="result-title" aria-describedby="result-detail">
+    <form class="result-review" method="dialog">
+      <button class="button button-quiet" id="result-review" type="submit" autofocus>查看对局</button>
+    </form>
+    <div class="result-banner">
+      <h2 id="result-title" lang="en"></h2>
+      <p id="result-detail"></p>
+      <div class="result-actions">
+        <button class="button button-primary" id="result-replay" type="button">再开一局</button>
+        <a class="button button-outline" id="result-home" href="./?v=boss-1">返回大厅</a>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog id="rules">
+    <div class="rules-head">
+      <h2>玩法</h2>
+      <form method="dialog">
+        <button class="button button-quiet" type="submit">关闭</button>
+      </form>
+    </div>
+    <p id="rules-choice">你有 24 点生命，巨像有 36 点。三分钟内将巨像的生命降到 0；倒计时结束时巨像仍然存活即为失败。每轮你选定后，巨像才亮出它提前锁定的行动。</p>
+    <p id="rules-order">格挡在亮牌时生效，其他牌先结算你的行动，再结算巨像的行动。双方初始有 4 点蓝，各自回合末回 1 蓝并摸 1 张牌。手牌上限为 6 张。</p>
+    <p>蓝量上限为 7，护盾先吸收伤害。牌堆摸空时，洗回弃牌堆。</p>
+    <div class="rules-list" id="rules-list"></div>
+    <a class="credit-link" href="credits.html?v=boss-1">查看美术素材来源</a>
+  </dialog>
+</body>
+</html>

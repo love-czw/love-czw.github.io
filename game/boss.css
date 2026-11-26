@@ -1,0 +1,89 @@
+.boss-page {
+  --player-x: 22%;
+  --computer-x: 50%;
+}
+.boss-page .boss-hud {
+  display: grid;
+  grid-template-columns: minmax(72px, .45fr) minmax(0, 2.1fr) minmax(80px, .55fr);
+  align-items: center;
+  gap: 10px 20px;
+  background: linear-gradient(100deg, #36251e, #1e211a 76%);
+}
+.boss-hud h2 {
+  margin: 0;
+  color: #f2d2a5;
+  font: 750 clamp(1.28rem, 2.2vw, 1.85rem)/1.16 var(--serif);
+  letter-spacing: .12em;
+  white-space: nowrap;
+}
+.boss-hud .fighter-stats {
+  grid-template-columns: minmax(90px, 2.1fr) minmax(58px, .85fr) minmax(4.2rem, 1.25fr);
+  max-width: none;
+  align-items: center;
+  gap: 14px;
+}
+.boss-hud .progress-health { background: linear-gradient(90deg, #7d3025, #e28059); }
+.boss-clock {
+  display: grid;
+  justify-items: end;
+  justify-self: end;
+  color: #decbae;
+  font-size: .78rem;
+  white-space: nowrap;
+}
+.boss-clock strong {
+  color: #ffda99;
+  font-size: clamp(1.25rem, 2.7vw, 1.9rem);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.16;
+}
+.boss-clock strong[data-urgent="true"] { color: #ff9b80; }
+
+.boss-stage {
+  min-height: clamp(348px, 37vw, 500px);
+  background:
+    radial-gradient(ellipse at 50% 75%, #99452042, transparent 60%),
+    linear-gradient(0deg, #130d09c0, transparent 48%, #14191170),
+    var(--duel-background) center 62% / cover,
+    #27261b;
+}
+.boss-stage .duel-unit[data-side="player"] { display: none; }
+.boss-stage .boss-unit[data-side="computer"] {
+  inset: auto auto 1% var(--computer-x);
+  width: min(90%, 640px);
+  height: 98%;
+}
+.boss-stage .boss-unit .duel-sprite img {
+  filter: drop-shadow(0 7px 9px #0e0907cf);
+}
+.boss-stage .boss-figure {
+  width: min(100%, 100cqh);
+  aspect-ratio: 1;
+}
+.boss-unit .duel-shadow { left: 21%; width: 58%; }
+.boss-unit .fighter-charge { width: min(100%, 480px); }
+.boss-stage .boss-unit .fighter-shield {
+  top: 53%;
+  left: 18%;
+  width: clamp(44px, 24%, 128px);
+  transform: translate(-50%, -50%) rotate(-12deg);
+}
+.boss-unit .duel-ward { inset: 9% 14% 0; }
+
+@media (max-width: 700px) {
+  .boss-page .boss-hud {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 3px 14px;
+    padding: 7px 12px;
+  }
+  .boss-hud h2 { grid-area: 1 / 1; }
+  .boss-hud .fighter-stats {
+    grid-area: 2 / 1;
+    grid-template-columns: minmax(0, 1.3fr) minmax(0, .7fr);
+    gap: 3px 8px;
+  }
+  .boss-hud .stat-lower { grid-column: 1 / -1; min-height: 0; }
+  .boss-clock { grid-area: 1 / 2 / span 2; }
+  .boss-stage { min-height: clamp(229px, 71vw, 388px); }
+  .boss-stage .boss-unit[data-side="computer"] { width: 100%; }
+}
