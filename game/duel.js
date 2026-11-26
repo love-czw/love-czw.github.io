@@ -69,11 +69,15 @@ export function createBattleMotion(stage) {
     if (command === "play" || command === "pass") showGuards(after.revealed);
 
     const side = command === "play" ? "player" : command === "computer" ? "computer" : null;
-    const move = side && before ? describeMove(side, before, after) : null;
+    if (side && before) await play(side, before, after);
+    if (command === "computer" || after.phase === "finished") showGuards(null);
+  }
+
+  async function play(side, before, after) {
+    const move = describeMove(side, before, after);
     if (move && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       await animate(side, move);
     }
-    if (command === "computer" || after.phase === "finished") showGuards(null);
   }
 
   async function animate(side, move) {
@@ -104,5 +108,5 @@ export function createBattleMotion(stage) {
     delete units[target].dataset.affected;
   }
 
-  return { resolve, sync };
+  return { resolve, sync, play, showGuards };
 }

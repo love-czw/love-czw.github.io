@@ -1,0 +1,56 @@
+.room-panel {
+  min-height: clamp(410px, 62vh, 665px);
+  display: grid;
+  align-items: center;
+  padding: clamp(18px, 6vw, 78px);
+  border: 1px solid #a8875155;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #131810f5 5%, #141911ed 34%, #13181036 86%),
+    url("assets/lobby/duel.webp") 64% 50% / cover, #181b14;
+}
+.room-front { width: min(100%, 360px); }
+.room-front h2 {
+  color: #fff0d0;
+  margin: 0 0 22px;
+  font: 750 clamp(2.6rem, 7vw, 5rem)/1.1 var(--serif);
+  letter-spacing: .04em;
+}
+.room-front label { display: block; margin-bottom: 6px; color: #ddcba8; font-size: .9rem; }
+.room-front .button { min-height: 44px; white-space: nowrap; }
+.room-join { margin-top: 20px; }
+.room-field { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; }
+.room-field input {
+  min-width: 0;
+  background: #141b15e8;
+  color: var(--ink);
+  border: 1px solid #a98d576f;
+  padding: 6px 9px;
+  border-radius: 4px;
+  font: 1rem/1.5 var(--sans);
+}
+.room-field input:focus-visible { outline: 2px solid #f3c781; outline-offset: 2px; }
+#room-input { text-transform: uppercase; letter-spacing: .14em; }
+.room-ticket { margin: 0 0 18px; color: #f8e6c5; }
+.room-ticket strong {
+  display: block;
+  font: 700 clamp(1.5rem, 7vw, 2.5rem)/1.35 Georgia, serif;
+  letter-spacing: .14em;
+}
+.room-message { min-height: 24px; color: #efcf93; font-size: .91rem; }
+.room-hud {
+  margin-bottom: 8px;
+  padding: 6px 9px;
+  background: #202a1e;
+  border: 1px solid #a991585e;
+  border-radius: 4px;
+  color: #f0d5a3;
+  font-size: .82rem;
+  text-align: center;
+}
+@media (max-width: 600px) {
+  .room-panel {
+    align-items: end;
+    background: linear-gradient(0deg, #141a13 3%, #151a13eb 36%, #13181055 86%),
+      url("assets/lobby/duel.webp") center / cover, #181b14;
+  }
+}

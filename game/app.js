@@ -1,6 +1,8 @@
-import { createBattleMotion } from "./duel.js?v=epic-3";
+import { createBattleMotion } from "./duel.js?v=rooms-1";
+import { initRoom, orientMatch } from "./room.js?v=rooms-live-1";
 
-const computerName = document.getElementById("computer-title").textContent;
+const onlineMode = new URLSearchParams(location.search).get("mode") === "pvp";
+const computerName = onlineMode ? "对手" : document.getElementById("computer-title").textContent;
 
 const cards = [
   { name: "普攻", cost: 1, art: "normal-attack.webp", tone: "ember",
@@ -71,6 +73,11 @@ let computerTimer = 0;
 let visibleLog = "";
 let match = null;
 let presentedResult = false;
+let roomClient = null;
+let roomSnapshot = null;
+let incomingRoom = null;
+let processingRoom = false;
+let committedRoomCard = null;
 
 function el(tag, className, content) {
   const element = document.createElement(tag);
@@ -111,6 +118,7 @@ async function getMatch() {
 }
 
 async function requestState(action) {
+  if (onlineMode) return requestRoomState(action);
   if (pending) {
     return;
   }
@@ -146,6 +154,97 @@ async function requestState(action) {
     if (state?.phase === "computer" && !error) {
       computerTimer = window.setTimeout(() => requestState({ type: "computer" }), 48);
     }
+  }
+}
+
+function bothPlayersOnline() {
+  return roomClient?.isConnected() && roomSnapshot?.online.every(Boolean);
+}
+
+function roomMayChoose() {
+  return bothPlayersOnline() && state?.phase === "play" && !state.ready[roomSnapshot.seat];
+}
+
+function roomMayDiscard() {
+  return bothPlayersOnline() && state?.phase === "discard" && state.player.hand.length > 6;
+}
+
+function roomMayRematch() {
+  return bothPlayersOnline() && state?.phase === "finished" && !roomSnapshot.rematch[roomSnapshot.seat];
+}
+
+function clearRoomCommitment() {
+  if (committedRoomCard) delete committedRoomCard.dataset.committed;
+  committedRoomCard = null;
+}
+
+function requestRoomState(action) {
+  if (pending || !action || !roomSnapshot?.state) return;
+  const { type, index } = action;
+  let command;
+  if ((type === "play" || type === "pass") && roomMayChoose()) command = "choose";
+  if (type === "discard" && roomMayDiscard()) command = "discard";
+  if (type === "restart" && roomMayRematch()) command = "rematch";
+  if (!command || !roomClient.send(command, index ?? -1)) return;
+
+  if (type === "play") {
+    committedRoomCard = dom.playerHand.children[index];
+    if (committedRoomCard) committedRoomCard.dataset.committed = "true";
+  }
+  pending = true;
+  error = "";
+  updateControls();
+}
+
+function localFighters(frame, seat) {
+  return seat === 0 ? frame : { player: frame.computer, computer: frame.player };
+}
+
+async function playRoomFrames(room, next) {
+  pending = true;
+  renderReveal(next.revealed);
+  dom.phaseTitle.textContent = "双方已亮牌";
+  dom.phaseDetail.textContent = "按本局先后手结算。";
+  updateControls();
+  battleMotion.showGuards(next.revealed);
+  for (const frame of next.frames) {
+    const side = frame.seat === room.seat ? "player" : "computer";
+    const before = localFighters(frame.before, room.seat);
+    const after = localFighters(frame.after, room.seat);
+    await battleMotion.play(side, before, { ...after, revealed: next.revealed });
+    battleMotion.sync(after);
+    updatePlayerStats(after.player);
+    updateComputerStats(after.computer);
+  }
+  battleMotion.showGuards(null);
+}
+
+async function receiveRoom(room) {
+  incomingRoom = room;
+  if (processingRoom) return;
+  processingRoom = true;
+  try {
+    while (incomingRoom) {
+      const current = incomingRoom;
+      incomingRoom = null;
+      const previous = roomSnapshot;
+      const next = orientMatch(current.state, current.seat);
+      roomSnapshot = current;
+      error = "";
+      const revealed = next?.revealed && previous?.state && previous.game === current.game &&
+        previous.state.revealed?.turn !== next.revealed.turn;
+      if (!next || !previous?.state || previous.game !== current.game || next.turn !== previous.state.turn ||
+          next.phase !== "play") {
+        clearRoomCommitment();
+      }
+      if (revealed) await playRoomFrames(current, next);
+      if (roomSnapshot !== current) continue;
+      state = next;
+      pending = false;
+      render();
+    }
+  } finally {
+    processingRoom = false;
   }
 }
 
@@ -292,18 +391,19 @@ function renderJournal(records) {
 
 function updateControls() {
   dom.board.setAttribute("aria-busy", String(pending));
-  dom.pass.disabled = pending || Boolean(error) || state?.phase !== "play";
-  dom.restart.disabled = pending || !state;
-  dom.playAgain.disabled = pending || !state;
-  dom.resultReplay.disabled = pending;
+  const canChoose = onlineMode ? roomMayChoose() : state?.phase === "play" && !error;
+  const canDiscard = onlineMode ? roomMayDiscard() : state?.phase === "discard" && !error;
+  const canRestart = onlineMode ? roomMayRematch() : Boolean(state);
+  dom.pass.disabled = pending || !canChoose;
+  dom.restart.disabled = pending || !canRestart;
+  dom.playAgain.disabled = pending || !canRestart;
+  dom.resultReplay.disabled = pending || (onlineMode && !canRestart);
   dom.retry.disabled = pending;
 
-  const discardMode = state?.phase === "discard";
   for (const button of dom.playerHand.querySelectorAll("button.card")) {
     const cost = cards[button.dataset.card].cost;
     const tooExpensive = state.player.mp < cost;
-    const canPlay = state.phase === "play" && !tooExpensive;
-    button.disabled = pending || Boolean(error) || !(discardMode || canPlay);
+    button.disabled = pending || !(canDiscard || (canChoose && !tooExpensive));
     button.classList.toggle("unaffordable", state.phase === "play" && tooExpensive);
   }
 }
@@ -317,12 +417,22 @@ function renderResult() {
     }
     return;
   }
+  const won = state.winner === "player";
+  const description = onlineMode ? (won ? "你赢下了这一局" : "对手赢下了这一局")
+    : (won ? "你击败了" + computerName : computerName + "赢下了这局");
+  if (onlineMode) {
+    const replayReady = roomSnapshot.rematch[roomSnapshot.seat];
+    dom.resultReplay.textContent = replayReady ? "等待好友" : "再开一局";
+    const status = replayReady ? "。等待好友同意后开始下一局。" :
+      !bothPlayersOnline() ? "。等待好友重新连接。" : "";
+    updateText(dom.resultDetail, description + status);
+  } else {
+    updateText(dom.resultDetail, description);
+  }
   if (presentedResult) return;
 
-  const won = state.winner === "player";
   dom.result.dataset.outcome = won ? "victory" : "defeat";
   dom.resultTitle.textContent = won ? "VICTORY" : "DEFEAT";
-  dom.resultDetail.textContent = won ? "你击败了" + computerName : computerName + "赢下了这局";
   if (dom.rules.open) dom.rules.close();
   dom.result.showModal();
   presentedResult = true;
@@ -331,7 +441,7 @@ function renderResult() {
 function render() {
   dom.notice.hidden = !error;
   dom.notice.textContent = error;
-  dom.retry.hidden = !error;
+  dom.retry.hidden = onlineMode || !error;
   dom.playAgain.hidden = true;
   dom.pass.hidden = true;
 
@@ -350,15 +460,34 @@ function render() {
 
   switch (state.phase) {
     case "play":
-      dom.phaseTitle.textContent = "你的回合";
-      dom.phaseDetail.textContent = state.player.hand.length
-        ? "对手已锁定行动。点一张手牌，或跳过。"
-        : "手牌为空，可以跳过并摸牌。";
-      dom.pass.hidden = Boolean(error);
+      if (onlineMode) {
+        const mySeat = roomSnapshot.seat;
+        const locked = state.ready[mySeat];
+        dom.phaseTitle.textContent = !bothPlayersOnline() ? "等待连接" : locked ? "已锁定" : "选择出牌";
+        dom.phaseDetail.textContent = !bothPlayersOnline() ? "好友离开时保留本轮进度。"
+          : locked ? "等对手锁定后同时亮牌。"
+          : state.ready[1 - mySeat] ? "对手已锁定。点一张手牌，或跳过。"
+          : "选一张手牌，或跳过。";
+        dom.pass.hidden = !roomMayChoose();
+      } else {
+        dom.phaseTitle.textContent = "你的回合";
+        dom.phaseDetail.textContent = state.player.hand.length
+          ? "对手已锁定行动。点一张手牌，或跳过。"
+          : "手牌为空，可以跳过并摸牌。";
+        dom.pass.hidden = Boolean(error);
+      }
       break;
     case "discard":
-      dom.phaseTitle.textContent = "选择弃牌";
-      dom.phaseDetail.textContent = "手牌 " + state.player.hand.length + " 张，点牌弃到 6 张。";
+      if (onlineMode && !bothPlayersOnline()) {
+        dom.phaseTitle.textContent = "等待连接";
+        dom.phaseDetail.textContent = "好友重新连接后继续弃牌。";
+      } else if (onlineMode && state.player.hand.length <= 6) {
+        dom.phaseTitle.textContent = "等待弃牌";
+        dom.phaseDetail.textContent = "等对手整理手牌后进入下一轮。";
+      } else {
+        dom.phaseTitle.textContent = "选择弃牌";
+        dom.phaseDetail.textContent = "手牌 " + state.player.hand.length + " 张，点牌弃到 6 张。";
+      }
       break;
     case "computer":
       dom.phaseTitle.textContent = "双方已亮牌";
@@ -401,4 +530,34 @@ dom.result.addEventListener("close", () => {
   if (state?.phase === "finished") dom.phaseTitle.focus({ preventScroll: true });
 });
 dom.retry.addEventListener("click", () => requestState());
-requestState();
+
+if (onlineMode) {
+  document.title = "双人对战 · 愚蠢的博弈游戏";
+  document.getElementById("computer-title").textContent = computerName;
+  document.getElementById("duel-opponent-name").textContent = computerName;
+  document.getElementById("recent-opponent-name").textContent = computerName;
+  dom.computerHand.setAttribute("aria-label", "对手的手牌");
+  dom.restart.hidden = true;
+  document.getElementById("rules-choice").textContent = "手牌公开，每轮各暗选一张牌或跳过，双方都锁定后一起亮牌。";
+  document.getElementById("rules-order").textContent = "格挡先同时生效，其余牌按先手、后手结算。房主第一局先手，双方同意再战后交换先后手。生命为 0 时结束。各自在回合末回 1 蓝、摸 1 张，超过 6 张就弃至 6 张。";
+  roomClient = initRoom({
+    onState: receiveRoom,
+    onDisconnect() {
+      pending = false;
+      if (state && !processingRoom) render();
+    },
+    onError(message, fatal) {
+      pending = false;
+      clearRoomCommitment();
+      error = message;
+      if (fatal) {
+        state = null;
+        roomSnapshot = null;
+        if (dom.result.open) dom.result.close();
+      }
+      if (state) render();
+    }
+  });
+} else {
+  requestState();
+}
