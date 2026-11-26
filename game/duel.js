@@ -49,9 +49,10 @@ export function createBattleMotion(stage) {
 
   function sync(state) {
     for (const side of Object.keys(units)) {
-      units[side].dataset.ward = state[side].sp > 0 ? "true" : "false";
-      units[side].dataset.charged = String(state[side].charged);
-      units[side].dataset.defeated = state[side].hp === 0 ? "true" : "false";
+      const fighter = state[side];
+      units[side].dataset.shielded = String(fighter.sp > 0);
+      units[side].dataset.charged = String(fighter.charged);
+      units[side].dataset.defeated = String(fighter.hp === 0);
     }
   }
 

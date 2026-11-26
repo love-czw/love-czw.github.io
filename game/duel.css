@@ -133,6 +133,7 @@
   transition: filter .25s ease, opacity .25s ease, transform .25s ease;
 }
 .duel-sprite img {
+  position: relative;
   width: 100%;
   height: 100%;
   min-height: 0;
@@ -168,20 +169,58 @@
   letter-spacing: .06em;
   white-space: nowrap;
 }
-.duel-charge {
+.fighter-charge {
   position: absolute;
-  left: 19%;
-  bottom: 0;
-  width: 62%;
-  height: 14%;
-  border: 1px solid #ffd17c;
-  border-radius: 50%;
+  left: 50%;
+  bottom: -1%;
+  width: 111%;
+  height: 78%;
   opacity: 0;
-  box-shadow: 0 0 12px #ed9d4e, inset 0 0 14px #db822e9c;
-  transition: opacity .25s ease;
+  transform: translateX(-50%);
+  transition: opacity .2s ease-out;
+  pointer-events: none;
 }
-.duel-unit[data-charged="true"] .duel-charge,
-.duel-unit[data-acting="charge"] .duel-charge { opacity: .9; }
+.duel-unit[data-charged="true"] .fighter-charge,
+.duel-unit[data-acting="charge"] .fighter-charge { opacity: 1; }
+.fighter-charge::before,
+.fighter-charge::after {
+  position: absolute;
+  content: "";
+}
+.fighter-charge::before {
+  inset: 0;
+  transform-origin: center bottom;
+  background: url("assets/duel/fighter-embers.webp") center bottom / 100% 100% no-repeat;
+}
+.fighter-charge::after {
+  inset: 0;
+  background:
+    radial-gradient(circle at 19% 58%, #ffe3a2 1.5px, transparent 3px),
+    radial-gradient(circle at 12% 77%, #ff984b 1.25px, transparent 2.75px),
+    radial-gradient(circle at 24% 36%, #ffab4c 1.25px, transparent 2.75px),
+    radial-gradient(circle at 81% 46%, #ffe3a2 1.5px, transparent 3px),
+    radial-gradient(circle at 90% 68%, #ff8945 1.25px, transparent 2.75px),
+    radial-gradient(circle at 75% 17%, #ffc475 1.25px, transparent 2.75px);
+}
+.fighter-shield {
+  position: absolute;
+  z-index: 2;
+  bottom: 20%;
+  left: 73%;
+  width: clamp(37px, 44%, 94px);
+  aspect-ratio: 227 / 320;
+  opacity: 0;
+  transform: translateX(-50%) rotate(-6deg);
+  background: url("assets/duel/fighter-ward.webp") center / contain no-repeat;
+  filter: drop-shadow(0 0 4px #86eed766);
+  transition: opacity .15s ease-out;
+  pointer-events: none;
+}
+.duel-unit[data-side="computer"] .fighter-shield {
+  left: 27%;
+  transform: translateX(-50%) scaleX(-1) rotate(-6deg);
+}
+.duel-unit[data-shielded="true"] .fighter-shield { opacity: 1; }
 .duel-ward {
   position: absolute;
   z-index: 2;
@@ -193,12 +232,32 @@
   pointer-events: none;
   transition: opacity .15s ease;
 }
-.duel-unit[data-ward="true"] .duel-ward { opacity: .62; }
 .duel-unit[data-guard="true"] .duel-ward {
   border-color: #d8f6ff;
   box-shadow: 0 0 20px #85d4ffaa, inset 0 0 21px #5fb5e08c;
   background: radial-gradient(ellipse, transparent 32%, #73b9e43f);
   opacity: .92;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .duel-unit:is([data-charged="true"], [data-acting="charge"]) .fighter-charge::before {
+    animation: charge-flicker .9s ease-in-out infinite alternate;
+  }
+  .duel-unit:is([data-charged="true"], [data-acting="charge"]) .fighter-charge::after {
+    animation: charge-embers 1.6s ease-out infinite;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fighter-charge, .fighter-shield { transition: none; }
+}
+@keyframes charge-flicker {
+  from { transform: scale(.98, .96); opacity: .86; }
+  to { transform: scale(1.025, 1.04); opacity: 1; }
+}
+@keyframes charge-embers {
+  0% { transform: translateY(6%); opacity: .1; }
+  30% { opacity: 1; }
+  100% { transform: translateY(-16%); opacity: 0; }
 }
 
 .duel-page .journal {

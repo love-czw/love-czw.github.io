@@ -4,11 +4,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#111613">
-  <meta name="description" content="愚蠢的博弈游戏。手牌公开，行动暗选。选一张牌，和邪恶的小北较量。">
+  <meta name="description" content="愚蠢的博弈游戏。手牌公开，行动暗选。选一张牌，和均衡的小北较量。">
   <title>愚蠢的博弈游戏</title>
   <link rel="icon" type="image/png" href="assets/shield-strike.png">
-  <link rel="stylesheet" href="lobby.css?v=lobby-2">
-  <script src="lobby.js" defer></script>
+  <link rel="stylesheet" href="lobby.css?v=fighter-status-1">
+  <script src="lobby.js?v=fighter-status-1" defer></script>
 </head>
 <body>
   <header class="topbar">
@@ -32,19 +32,19 @@
     <section class="modes" aria-labelledby="modes-title">
       <h2 id="modes-title">选择模式</h2>
       <div class="mode-grid">
-        <a class="mode mode-ai" href="battle.html?v=rooms-live-1" aria-labelledby="ai-label" aria-describedby="ai-detail">
+        <a class="mode mode-ai" href="battle.html?v=fighter-status-1" aria-labelledby="ai-label" aria-describedby="ai-detail">
           <span class="mode-art"></span>
           <span class="mode-status"><i aria-hidden="true"></i>可游玩</span>
           <span class="mode-copy">
             <strong id="ai-label">人机对战</strong>
-            <span id="ai-detail">挑战邪恶的小北</span>
+            <span id="ai-detail">挑战均衡的小北</span>
           </span>
           <span class="mode-arrow" aria-hidden="true">↗</span>
         </a>
-        <a class="mode mode-duel" href="battle.html?mode=pvp&amp;v=rooms-live-1"
+        <a class="mode mode-duel" href="battle.html?mode=pvp&amp;v=fighter-status-1"
            aria-labelledby="duel-label" aria-describedby="duel-status">
           <span class="mode-art"></span>
-          <span class="mode-status" id="duel-status">好友房</span>
+          <span class="mode-status" id="duel-status"><i aria-hidden="true"></i>可游玩</span>
           <span class="mode-copy">
             <strong id="duel-label">双人对战</strong>
             <span>与好友较量</span>

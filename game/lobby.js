@@ -10,8 +10,8 @@ const panels = {
     description: "这个模式筹备中。未来可以沿着高塔逐层挑战。"
   },
   boss: {
-    title: "限时 Boss",
-    description: "这个模式筹备中。未来可以在时限内挑战巨像。"
+    title: "巨像",
+    description: "限时挑战筹备中。"
   }
 };
 

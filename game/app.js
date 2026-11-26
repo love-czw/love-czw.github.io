@@ -1,4 +1,4 @@
-import { createBattleMotion } from "./duel.js?v=rooms-1";
+import { createBattleMotion } from "./duel.js?v=fighter-status-1";
 import { initRoom, orientMatch } from "./room.js?v=rooms-live-1";
 
 const onlineMode = new URLSearchParams(location.search).get("mode") === "pvp";
@@ -105,9 +105,9 @@ function isValidState(next) {
 async function getMatch() {
   if (!match) {
     try {
-      const { default: createEngine } = await import("./game-engine.js?v=blind-pick-1");
+      const { default: createEngine } = await import("./game-engine.js?v=fighter-status-1");
       const engine = await createEngine({
-        locateFile: (file, prefix) => prefix + file + "?v=blind-pick-1"
+        locateFile: (file, prefix) => prefix + file + "?v=fighter-status-1"
       });
       match = new engine.PreviewMatch();
     } catch {

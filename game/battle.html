@@ -9,17 +9,17 @@
   <title>人机对战 · 愚蠢的博弈游戏</title>
   <link rel="icon" type="image/png" href="assets/shield-strike.png">
   <link rel="stylesheet" href="styles.css?v=epic-3">
-  <link rel="stylesheet" href="duel.css?v=epic-3">
+  <link rel="stylesheet" href="duel.css?v=fighter-status-1">
   <link rel="stylesheet" href="duel-effects.css?v=epic-3">
   <link rel="stylesheet" href="result.css?v=epic-4">
   <link rel="stylesheet" href="room.css?v=rooms-1">
-  <script type="module" src="app.js?v=rooms-live-1"></script>
+  <script type="module" src="app.js?v=fighter-status-1"></script>
 </head>
 <body class="duel-page">
   <header class="masthead">
     <div class="masthead-inner">
       <div class="masthead-identity">
-        <a class="button button-outline battle-home" href="./?v=rooms-live-1">
+        <a class="button button-outline battle-home" href="./?v=fighter-status-1">
           <span aria-hidden="true">←</span> 返回大厅
         </a>
         <div class="brand">
@@ -66,27 +66,33 @@
     <section class="board" id="board" aria-label="卡牌战场" data-phase="loading">
       <section class="fighter fighter-computer" aria-labelledby="computer-title">
         <div class="fighter-profile">
-          <h2 id="computer-title">邪恶的小北</h2>
+          <h2 id="computer-title">均衡的小北</h2>
           <div id="computer-stats" class="fighter-stats"></div>
         </div>
-        <div id="computer-hand" class="hand opponent-hand" aria-label="邪恶的小北的手牌"></div>
+        <div id="computer-hand" class="hand opponent-hand" aria-label="均衡的小北的手牌"></div>
       </section>
 
       <section class="arena" aria-label="对战区">
         <div class="duel-stage" aria-hidden="true">
           <div class="duel-unit" data-side="player">
             <div class="duel-shadow"></div>
+            <div class="duel-sprite">
+              <div class="fighter-charge"></div>
+              <img src="assets/duel/player.webp" alt="" draggable="false">
+              <div class="fighter-shield"></div>
+            </div>
             <div class="duel-ward"></div>
-            <div class="duel-charge"></div>
-            <div class="duel-sprite"><img src="assets/duel/player.webp" alt="" draggable="false"></div>
             <span class="duel-name">你</span>
           </div>
           <div class="duel-unit" data-side="computer">
             <div class="duel-shadow"></div>
+            <div class="duel-sprite">
+              <div class="fighter-charge"></div>
+              <img src="assets/duel/computer.webp" alt="" draggable="false">
+              <div class="fighter-shield"></div>
+            </div>
             <div class="duel-ward"></div>
-            <div class="duel-charge"></div>
-            <div class="duel-sprite"><img src="assets/duel/computer.webp" alt="" draggable="false"></div>
-            <span class="duel-name" id="duel-opponent-name">邪恶的小北</span>
+            <span class="duel-name" id="duel-opponent-name">均衡的小北</span>
           </div>
           <div class="duel-effects"></div>
         </div>
@@ -100,7 +106,7 @@
               <strong id="latest-player">待亮牌</strong>
             </div>
             <div class="recent-move recent-computer">
-              <span id="recent-opponent-name">邪恶的小北</span>
+              <span id="recent-opponent-name">均衡的小北</span>
               <strong id="latest-computer">待亮牌</strong>
             </div>
           </div>
@@ -146,7 +152,7 @@
       <p id="result-detail"></p>
       <div class="result-actions">
         <button class="button button-primary" id="result-replay" type="button">再开一局</button>
-        <a class="button button-outline" id="result-home" href="./?v=rooms-live-1">返回大厅</a>
+        <a class="button button-outline" id="result-home" href="./?v=fighter-status-1">返回大厅</a>
       </div>
     </div>
   </dialog>
@@ -162,7 +168,7 @@
     <p id="rules-order">格挡在亮牌时对双方同时生效，本轮结束时失效。其余牌先结算你的行动，再结算电脑的行动。生命降到 0 时立即结束。各自在回合末回 1 蓝、摸 1 张，超过 6 张就弃至 6 张。</p>
     <p>蓝量上限 7，护盾先吸收伤害。牌堆摸空时，洗回弃牌堆。先把对手打到 0 血就赢。</p>
     <div class="rules-list" id="rules-list"></div>
-    <a class="credit-link" href="credits.html?v=rooms-live-1">查看美术素材来源</a>
+    <a class="credit-link" href="credits.html?v=fighter-status-1">查看美术素材来源</a>
   </dialog>
 </body>
 </html>
